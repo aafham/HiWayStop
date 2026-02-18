@@ -1,6 +1,6 @@
 'use client';
 
-import { Fuel, Route, Search, SlidersHorizontal, Sparkles } from 'lucide-react';
+import { Check, Fuel, Route, Search, SlidersHorizontal, Sparkles, Undo2 } from 'lucide-react';
 import { FacilityFlags, ViewMode } from '@/types';
 
 type FilterPanelProps = {
@@ -17,6 +17,10 @@ type FilterPanelProps = {
   setBufferMeters: (value: number) => void;
   rangeKm: string;
   setRangeKm: (value: string) => void;
+  onResetFilters: () => void;
+  onApplyPreset: (preset: 'FUEL_FIRST' | 'FAMILY_STOP' | 'EV_ONLY') => void;
+  fuelInRangeCount: number | null;
+  totalFuelCount: number;
 };
 
 const viewModes: Array<{ label: string; value: ViewMode }> = [
@@ -39,8 +43,15 @@ export default function FilterPanel({
   setBufferMeters,
   rangeKm,
   setRangeKm,
+  onResetFilters,
+  onApplyPreset,
+  fuelInRangeCount,
+  totalFuelCount,
 }: FilterPanelProps) {
   const activeFacilitiesCount = Object.values(facilities).filter(Boolean).length;
+  const sliderLeftPct = ((bufferMeters - 200) / 600) * 100;
+  const destinationSuggestions = ['Ipoh', 'Kuantan', 'Johor Bahru'];
+  const rangeSuggestions = ['100', '200', '350', '500'];
 
   return (
     <section className="space-y-4 border-b border-slate-200 bg-gradient-to-b from-white to-slate-50 px-4 py-4">
@@ -49,9 +60,46 @@ export default function FilterPanel({
           <SlidersHorizontal className="h-4 w-4" />
           Penapis
         </div>
-        <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
-          Corridor {bufferMeters}m
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+            Corridor {bufferMeters}m
+          </span>
+          <button
+            type="button"
+            onClick={onResetFilters}
+            className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-300 hover:bg-slate-100"
+          >
+            <Undo2 className="h-3.5 w-3.5" />
+            Reset
+          </button>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Quick Preset</p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => onApplyPreset('FUEL_FIRST')}
+            className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-400"
+          >
+            Wajib Minyak
+          </button>
+          <button
+            type="button"
+            onClick={() => onApplyPreset('FAMILY_STOP')}
+            className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-400"
+          >
+            Family Stop
+          </button>
+          <button
+            type="button"
+            onClick={() => onApplyPreset('EV_ONLY')}
+            className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-400"
+          >
+            EV Sahaja
+          </button>
+        </div>
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
@@ -86,6 +134,18 @@ export default function FilterPanel({
             className="w-full rounded-xl border border-slate-300 bg-slate-50 py-2 pl-9 pr-3 text-sm outline-none ring-brand-500 focus:border-brand-500 focus:bg-white focus:ring"
           />
         </div>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {destinationSuggestions.map((item) => (
+            <button
+              key={item}
+              type="button"
+              onClick={() => setDestination(item)}
+              className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-200"
+            >
+              {item}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
@@ -112,6 +172,7 @@ export default function FilterPanel({
                     : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400'
                 }`}
               >
+                {active ? <Check className="mr-1 inline h-3.5 w-3.5" /> : null}
                 {brand}
               </button>
             );
@@ -143,6 +204,7 @@ export default function FilterPanel({
                     : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400'
                 }`}
               >
+                {active ? <Check className="mr-1 inline h-3.5 w-3.5" /> : null}
                 {facility.toUpperCase()}
               </button>
             );
@@ -158,6 +220,14 @@ export default function FilterPanel({
           </span>
           <span className="rounded-full bg-brand-50 px-2 py-0.5 text-brand-700">{bufferMeters}m</span>
         </div>
+        <div className="relative mb-1 h-5">
+          <span
+            className="absolute top-0 -translate-x-1/2 rounded-full bg-brand-500 px-2 py-0.5 text-[11px] font-semibold text-white"
+            style={{ left: `${sliderLeftPct}%` }}
+          >
+            {bufferMeters}m
+          </span>
+        </div>
         <input
           type="range"
           min={200}
@@ -171,6 +241,7 @@ export default function FilterPanel({
           <span>200m</span>
           <span>800m</span>
         </div>
+        <p className="mt-1 text-[11px] text-slate-500">Buffer lebih besar = lebih banyak stesen mungkin dipaparkan.</p>
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
@@ -191,6 +262,23 @@ export default function FilterPanel({
             km
           </span>
         </div>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {rangeSuggestions.map((value) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setRangeKm(value)}
+              className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-200"
+            >
+              {value} km
+            </button>
+          ))}
+        </div>
+        {fuelInRangeCount !== null ? (
+          <p className="mt-2 text-[11px] font-medium text-slate-600">
+            {fuelInRangeCount} / {totalFuelCount} stesen minyak dalam range semasa.
+          </p>
+        ) : null}
       </div>
     </section>
   );

@@ -13,6 +13,7 @@ import {
   detectClosestHighway,
   filterHighwayOnlyStations,
   getETA,
+  haversineKm,
   getNearestItems,
   getNextAlongHighway,
   runGeoSelfCheck,
@@ -217,6 +218,59 @@ export default function HomePage() {
     setFacilityFilter((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  const resetFilters = () => {
+    setViewMode('ALL');
+    setDestination('');
+    setSelectedBrands([]);
+    setFacilityFilter({ surau: false, toilet: false, foodcourt: false, ev: false });
+    setBufferMeters(400);
+    setRangeKmInput('');
+  };
+
+  const applyPreset = (preset: 'FUEL_FIRST' | 'FAMILY_STOP' | 'EV_ONLY') => {
+    if (preset === 'FUEL_FIRST') {
+      setViewMode('FUEL');
+      setSelectedBrands([]);
+      setFacilityFilter({ surau: false, toilet: false, foodcourt: false, ev: false });
+      return;
+    }
+    if (preset === 'FAMILY_STOP') {
+      setViewMode('RNR');
+      setFacilityFilter({ surau: true, toilet: true, foodcourt: true, ev: false });
+      return;
+    }
+    setViewMode('ALL');
+    setFacilityFilter({ surau: false, toilet: false, foodcourt: false, ev: true });
+  };
+
+  const fuelInRangeCount = useMemo(() => {
+    if (!userLoc || !rangeKm || rangeKm <= 0) return null;
+    const eligibleFuel = highwayOnlyStations
+      .map(stationToPlace)
+      .filter((item) => selectedBrands.length === 0 || (item.brand ? selectedBrands.includes(item.brand) : false));
+    return eligibleFuel.filter((item) => haversineKm(userLoc, { lat: item.lat, lng: item.lng }) <= rangeKm).length;
+  }, [highwayOnlyStations, rangeKm, selectedBrands, userLoc]);
+
+  const totalFuelCount = useMemo(
+    () =>
+      highwayOnlyStations
+        .map(stationToPlace)
+        .filter((item) => selectedBrands.length === 0 || (item.brand ? selectedBrands.includes(item.brand) : false))
+        .length,
+    [highwayOnlyStations, selectedBrands],
+  );
+
+  const activeFacilities = Object.entries(facilityFilter)
+    .filter(([, value]) => value)
+    .map(([key]) => key.toUpperCase());
+  const activeFiltersCount =
+    (destination.trim() ? 1 : 0) +
+    (viewMode !== 'ALL' ? 1 : 0) +
+    (selectedBrands.length > 0 ? 1 : 0) +
+    (activeFacilities.length > 0 ? 1 : 0) +
+    (bufferMeters !== 400 ? 1 : 0) +
+    (rangeKm !== null ? 1 : 0);
+
   return (
     <main className="mx-auto min-h-screen max-w-5xl bg-white shadow-sm">
       <TopBar locationStatus={locationStatus} onUseLocation={useCurrentLocation} loading={locationLoading} />
@@ -265,7 +319,36 @@ export default function HomePage() {
         setBufferMeters={setBufferMeters}
         rangeKm={rangeKmInput}
         setRangeKm={setRangeKmInput}
+        onResetFilters={resetFilters}
+        onApplyPreset={applyPreset}
+        fuelInRangeCount={fuelInRangeCount}
+        totalFuelCount={totalFuelCount}
       />
+
+      {activeFiltersCount > 0 ? (
+        <section className="sticky top-[65px] z-30 border-b border-slate-200 bg-white/95 px-4 py-2 backdrop-blur">
+          <div className="flex flex-wrap items-center gap-2 text-[11px]">
+            <span className="rounded-full bg-slate-900 px-2 py-0.5 font-semibold text-white">{activeFiltersCount} penapis aktif</span>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">Mode: {viewMode}</span>
+            {selectedBrands.length > 0 ? (
+              <span className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">
+                Brand: {selectedBrands.length}
+              </span>
+            ) : null}
+            {activeFacilities.length > 0 ? (
+              <span className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">
+                Kemudahan: {activeFacilities.length}
+              </span>
+            ) : null}
+            {bufferMeters !== 400 ? (
+              <span className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">Buffer: {bufferMeters}m</span>
+            ) : null}
+            {rangeKm !== null ? (
+              <span className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">Range: {rangeKm}km</span>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
 
       {!userLoc ? (
         <section className="flex h-[45vh] flex-col items-center justify-center gap-3 border-b border-slate-200 bg-slate-50 px-4 text-center">
