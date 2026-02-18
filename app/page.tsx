@@ -3,7 +3,15 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { AlertTriangle, Compass, LocateFixed, MapPinOff, ShieldAlert } from 'lucide-react';
+import {
+  AlertTriangle,
+  Compass,
+  LocateFixed,
+  MapPinOff,
+  PanelBottomOpen,
+  PanelTopOpen,
+  ShieldAlert,
+} from 'lucide-react';
 import BottomSheet from '@/components/BottomSheet';
 import FilterPanel from '@/components/FilterPanel';
 import TopBar from '@/components/TopBar';
@@ -92,8 +100,26 @@ function HomePageContent() {
   const [sortMode, setSortMode] = useState<SortMode>('DISTANCE');
   const [selectedPlace, setSelectedPlace] = useState<PlaceItem | null>(null);
 
+  const [showMap, setShowMap] = useState(true);
+  const [showList, setShowList] = useState(true);
+  const [isFilterCompact, setIsFilterCompact] = useState(false);
+  const [isFilterExpanded, setIsFilterExpanded] = useState(true);
+  const [filterFlash, setFilterFlash] = useState(false);
+
   useEffect(() => {
     runGeoSelfCheck();
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const compact = window.scrollY > 480;
+      setIsFilterCompact(compact);
+      if (!compact) setIsFilterExpanded(true);
+    };
+
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   useEffect(() => {
@@ -158,7 +184,11 @@ function HomePageContent() {
         setPreviousLoc(userLoc);
         setUserLoc(nextLoc);
 
-        if (typeof position.coords.heading === 'number' && !Number.isNaN(position.coords.heading) && position.coords.heading >= 0) {
+        if (
+          typeof position.coords.heading === 'number' &&
+          !Number.isNaN(position.coords.heading) &&
+          position.coords.heading >= 0
+        ) {
           setHeading(position.coords.heading);
         }
 
@@ -208,11 +238,11 @@ function HomePageContent() {
       merged = merged.filter((item) => item.kind !== 'FUEL' || (item.brand ? selectedBrands.includes(item.brand) : false));
     }
 
-    const activeFacilities = Object.entries(facilityFilter).filter(([, value]) => value);
-    if (activeFacilities.length > 0) {
+    const activeFacilitiesRaw = Object.entries(facilityFilter).filter(([, value]) => value);
+    if (activeFacilitiesRaw.length > 0) {
       merged = merged.filter((item) => {
         if (item.kind !== 'RNR' || !item.facilities) return false;
-        return activeFacilities.every(([key]) => item.facilities?.[key as keyof FacilityFlags]);
+        return activeFacilitiesRaw.every(([key]) => item.facilities?.[key as keyof FacilityFlags]);
       });
     }
 
@@ -257,7 +287,9 @@ function HomePageContent() {
       return { rnr: [] as PlaceItem[], fuel: [] as PlaceItem[] };
     }
 
-    const sameHighwayItems = places.filter((item) => item.highwayId === currentHighway.id && directionMatches(item.direction, direction));
+    const sameHighwayItems = places.filter(
+      (item) => item.highwayId === currentHighway.id && directionMatches(item.direction, direction),
+    );
 
     const nextRnr = getNextAlongHighway(
       userLoc,
@@ -288,7 +320,7 @@ function HomePageContent() {
     if (locationLoading) return 'Sedang mengesan lokasi...';
     if (locationError) return `Ralat lokasi: ${locationError}`;
     if (!userLoc) return 'Lokasi belum dipilih';
-    if (!currentHighway) return 'Highway semasa: Tidak pasti';
+    if (!currentHighway) return 'Highway semasa: Tidak pasti (lokasi mungkin jauh dari corridor lebuh raya)';
     return `Highway semasa: ${currentHighway.code}`;
   }, [currentHighway, locationError, locationLoading, userLoc]);
 
@@ -328,12 +360,17 @@ function HomePageContent() {
 
   const fuelInRangeCount = useMemo(() => {
     if (!userLoc || !rangeKm || rangeKm <= 0) return null;
-    const eligibleFuel = fuelPlaces.filter((item) => selectedBrands.length === 0 || (item.brand ? selectedBrands.includes(item.brand) : false));
+    const eligibleFuel = fuelPlaces.filter(
+      (item) => selectedBrands.length === 0 || (item.brand ? selectedBrands.includes(item.brand) : false),
+    );
     return eligibleFuel.filter((item) => haversineKm(userLoc, { lat: item.lat, lng: item.lng }) <= rangeKm).length;
   }, [fuelPlaces, rangeKm, selectedBrands, userLoc]);
 
   const totalFuelCount = useMemo(
-    () => fuelPlaces.filter((item) => selectedBrands.length === 0 || (item.brand ? selectedBrands.includes(item.brand) : false)).length,
+    () =>
+      fuelPlaces.filter(
+        (item) => selectedBrands.length === 0 || (item.brand ? selectedBrands.includes(item.brand) : false),
+      ).length,
     [fuelPlaces, selectedBrands],
   );
 
@@ -348,6 +385,12 @@ function HomePageContent() {
     (bufferMeters !== 400 ? 1 : 0) +
     (rangeKm !== null ? 1 : 0);
 
+  useEffect(() => {
+    setFilterFlash(true);
+    const id = window.setTimeout(() => setFilterFlash(false), 220);
+    return () => window.clearTimeout(id);
+  }, [activeFiltersCount]);
+
   const emptyReason = useMemo(() => {
     if (places.length > 0) return '';
     const parts: string[] = [];
@@ -356,6 +399,25 @@ function HomePageContent() {
     if (bufferMeters < 400) parts.push(`buffer ketat ${bufferMeters}m`);
     return parts.length > 0 ? `Tiada hasil untuk ${parts.join(' + ')}.` : 'Tiada hasil untuk penapis semasa.';
   }, [activeFacilities, bufferMeters, places.length, selectedBrands]);
+
+  const priorityNextStop = useMemo(() => {
+    const candidates = [...nextByDirection.rnr, ...nextByDirection.fuel];
+    if (candidates.length === 0) return null;
+    return [...candidates].sort((a, b) => (a.distanceKm ?? 0) - (b.distanceKm ?? 0))[0];
+  }, [nextByDirection.fuel, nextByDirection.rnr]);
+
+  const tripStats = useMemo(() => {
+    const nextStopKm = priorityNextStop?.distanceKm ?? null;
+    const averageSpeedKmh = 90;
+    const restAdviceMinutes = 120;
+    return {
+      nextStopKm,
+      nextStopEta: nextStopKm !== null ? Math.round((nextStopKm / averageSpeedKmh) * 60) : null,
+      fuelInRange: fuelInRangeCount ?? totalFuelCount,
+      totalFuel: totalFuelCount,
+      restAdviceMinutes,
+    };
+  }, [fuelInRangeCount, priorityNextStop?.distanceKm, totalFuelCount]);
 
   return (
     <main className="mx-auto min-h-screen max-w-5xl bg-white shadow-sm">
@@ -366,6 +428,47 @@ function HomePageContent() {
           <ShieldAlert className="h-3.5 w-3.5" />
           Demi keselamatan, jangan guna aplikasi ini semasa memandu. Gunakan ketika berhenti.
         </p>
+      </section>
+
+      <section className="sticky top-[106px] z-30 border-b border-slate-200 bg-white/95 px-4 py-2 backdrop-blur">
+        <div className="inline-flex rounded-full bg-slate-100 p-1">
+          <button
+            type="button"
+            onClick={() => {
+              setShowMap(true);
+              setShowList(false);
+            }}
+            className={`rounded-full px-3 py-1 text-xs font-semibold ${
+              showMap && !showList ? 'bg-brand-500 text-white' : 'text-slate-700'
+            }`}
+          >
+            Map
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setShowMap(false);
+              setShowList(true);
+            }}
+            className={`rounded-full px-3 py-1 text-xs font-semibold ${
+              !showMap && showList ? 'bg-brand-500 text-white' : 'text-slate-700'
+            }`}
+          >
+            List
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setShowMap(true);
+              setShowList(true);
+            }}
+            className={`rounded-full px-3 py-1 text-xs font-semibold ${
+              showMap && showList ? 'bg-brand-500 text-white' : 'text-slate-700'
+            }`}
+          >
+            Map + List
+          </button>
+        </div>
       </section>
 
       <section className="grid gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3 sm:grid-cols-2">
@@ -381,9 +484,7 @@ function HomePageContent() {
               {nearestRnr ? (
                 <>
                   <p className="mt-1 text-sm font-semibold text-slate-900">{nearestRnr.name}</p>
-                  <p className="text-xs text-slate-600">
-                    {nearestRnr.distanceKm.toFixed(1)} km - ETA {nearestRnr.etaMinutes} min
-                  </p>
+                  <p className="text-xs text-slate-600">{nearestRnr.distanceKm.toFixed(1)} km - ETA {nearestRnr.etaMinutes} min</p>
                 </>
               ) : (
                 <p className="mt-1 text-xs text-slate-500">Aktifkan lokasi untuk lihat R&R terdekat.</p>
@@ -407,30 +508,52 @@ function HomePageContent() {
         )}
       </section>
 
-      <FilterPanel
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-        destination={destination}
-        setDestination={setDestination}
-        selectedBrands={selectedBrands}
-        toggleBrand={toggleBrand}
-        brands={allBrands}
-        facilities={facilityFilter}
-        toggleFacility={toggleFacility}
-        bufferMeters={bufferMeters}
-        setBufferMeters={setBufferMeters}
-        rangeKm={rangeKmInput}
-        setRangeKm={setRangeKmInput}
-        onResetFilters={resetFilters}
-        onApplyPreset={applyPreset}
-        fuelInRangeCount={fuelInRangeCount}
-        totalFuelCount={totalFuelCount}
-      />
+      {isFilterCompact ? (
+        <section className="border-b border-slate-200 bg-slate-50 px-4 py-2">
+          <button
+            type="button"
+            onClick={() => setIsFilterExpanded((prev) => !prev)}
+            className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700"
+          >
+            <span className={`inline-flex items-center gap-2 rounded-full px-2 py-1 ${filterFlash ? 'filter-pop bg-brand-100 text-brand-700' : 'bg-slate-100'}`}>
+              {activeFiltersCount} penapis aktif
+            </span>
+            <span className="inline-flex items-center gap-1">
+              {isFilterExpanded ? <PanelTopOpen className="h-4 w-4" /> : <PanelBottomOpen className="h-4 w-4" />}
+              {isFilterExpanded ? 'Sembunyi Penapis' : 'Buka Penapis'}
+            </span>
+          </button>
+        </section>
+      ) : null}
+
+      {!isFilterCompact || isFilterExpanded ? (
+        <FilterPanel
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          destination={destination}
+          setDestination={setDestination}
+          selectedBrands={selectedBrands}
+          toggleBrand={toggleBrand}
+          brands={allBrands}
+          facilities={facilityFilter}
+          toggleFacility={toggleFacility}
+          bufferMeters={bufferMeters}
+          setBufferMeters={setBufferMeters}
+          rangeKm={rangeKmInput}
+          setRangeKm={setRangeKmInput}
+          onResetFilters={resetFilters}
+          onApplyPreset={applyPreset}
+          fuelInRangeCount={fuelInRangeCount}
+          totalFuelCount={totalFuelCount}
+        />
+      ) : null}
 
       {activeFiltersCount > 0 ? (
-        <section className="sticky top-[65px] z-30 border-b border-slate-200 bg-white/95 px-4 py-2 backdrop-blur">
+        <section className="sticky top-[146px] z-20 border-b border-slate-200 bg-white/95 px-4 py-2 backdrop-blur">
           <div className="flex flex-wrap items-center gap-2 text-[11px]">
-            <span className="rounded-full bg-slate-900 px-2 py-0.5 font-semibold text-white">{activeFiltersCount} penapis aktif</span>
+            <span className={`rounded-full px-2 py-0.5 font-semibold text-white ${filterFlash ? 'filter-pop bg-brand-500' : 'bg-slate-900'}`}>
+              {activeFiltersCount} penapis aktif
+            </span>
             <span className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">Mode: {viewMode}</span>
             {selectedBrands.length > 0 ? (
               <span className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">Brand: {selectedBrands.length}</span>
@@ -448,15 +571,63 @@ function HomePageContent() {
         </section>
       ) : null}
 
+      {priorityNextStop ? (
+        <section className="border-b border-slate-200 bg-white px-4 py-3">
+          <div className="rounded-2xl border border-brand-200 bg-brand-50 p-3">
+            <p className="text-[11px] font-bold uppercase tracking-wide text-brand-700">Seterusnya dalam laluan</p>
+            <p className="mt-1 text-sm font-bold text-brand-900">{priorityNextStop.name}</p>
+            <p className="text-xs text-brand-900/80">
+              {(priorityNextStop.distanceKm ?? 0).toFixed(1)} km - ETA {priorityNextStop.etaMinutes ?? 0} min
+            </p>
+          </div>
+        </section>
+      ) : null}
+
+      <section className="border-b border-slate-200 bg-slate-50 px-4 py-3">
+        <div className="rounded-2xl border border-slate-200 bg-white p-3">
+          <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Trip sekarang</p>
+          <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-slate-700">
+            <div className="rounded-lg bg-slate-50 p-2">
+              <p className="font-semibold">Next Stop</p>
+              <p>{tripStats.nextStopKm !== null ? `${tripStats.nextStopKm.toFixed(1)} km` : 'Belum tersedia'}</p>
+            </div>
+            <div className="rounded-lg bg-slate-50 p-2">
+              <p className="font-semibold">ETA Next</p>
+              <p>{tripStats.nextStopEta !== null ? `${tripStats.nextStopEta} min` : 'Belum tersedia'}</p>
+            </div>
+            <div className="rounded-lg bg-slate-50 p-2">
+              <p className="font-semibold">Fuel Dalam Range</p>
+              <p>
+                {tripStats.fuelInRange}/{tripStats.totalFuel}
+              </p>
+            </div>
+            <div className="rounded-lg bg-slate-50 p-2">
+              <p className="font-semibold">Cadangan Rehat</p>
+              <p>Setiap {tripStats.restAdviceMinutes} min</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {!userLoc ? (
         <section className="flex h-[45vh] flex-col items-center justify-center gap-3 border-b border-slate-200 bg-slate-50 px-4 text-center">
-          {locationLoading ? <div className="h-24 w-full max-w-md animate-pulse rounded-2xl bg-slate-200" /> : <LocateFixed className="h-8 w-8 text-slate-500" />}
+          {locationLoading ? (
+            <div className="h-24 w-full max-w-md animate-pulse rounded-2xl bg-slate-200" />
+          ) : (
+            <LocateFixed className="h-8 w-8 text-slate-500" />
+          )}
           <p className="text-sm font-semibold text-slate-700">Tekan "Guna lokasi saya" untuk mula.</p>
           <p className="text-xs text-slate-500">Data hanya lebuh raya dan stesen minyak highway-only.</p>
         </section>
-      ) : (
-        <HighwayMap userLoc={userLoc} highways={highways} places={places} onSelect={setSelectedPlace} />
-      )}
+      ) : showMap ? (
+        <HighwayMap
+          userLoc={userLoc}
+          highways={highways}
+          places={places}
+          onSelect={setSelectedPlace}
+          rangeKm={rangeKm}
+        />
+      ) : null}
 
       {userLoc && !direction ? (
         <section className="border-b border-slate-200 bg-amber-50 px-4 py-3">
@@ -471,7 +642,9 @@ function HomePageContent() {
                 type="button"
                 onClick={() => setManualDirection(value)}
                 className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                  manualDirection === value ? 'bg-brand-500 text-white' : 'bg-white text-slate-700 ring-1 ring-slate-300'
+                  manualDirection === value
+                    ? 'bg-brand-500 text-white'
+                    : 'bg-white text-slate-700 ring-1 ring-slate-300'
                 }`}
               >
                 {value}
@@ -515,21 +688,37 @@ function HomePageContent() {
                 Naikkan buffer +100m
               </button>
             ) : null}
+            {destination.trim() ? (
+              <button
+                type="button"
+                onClick={() => setDestination('')}
+                className="rounded-full bg-white px-3 py-1 font-semibold text-slate-700 ring-1 ring-slate-300"
+              >
+                Kosongkan destinasi
+              </button>
+            ) : null}
           </div>
+          <p className="text-[11px] text-slate-500">Tip: cuba mode “Semua” atau buffer 500m untuk liputan lebih luas.</p>
         </section>
       ) : null}
 
-      <BottomSheet
-        nearest={nearestTop10}
-        nextRnR={nextByDirection.rnr}
-        nextFuel={nextByDirection.fuel}
-        selected={selectedPlace}
-        onSelect={setSelectedPlace}
-        rangeKm={rangeKm}
-        sortMode={sortMode}
-        onSortModeChange={setSortMode}
-        loading={locationLoading}
-      />
+      {showList ? (
+        <BottomSheet
+          nearest={nearestTop10}
+          nextRnR={nextByDirection.rnr}
+          nextFuel={nextByDirection.fuel}
+          selected={selectedPlace}
+          onSelect={setSelectedPlace}
+          rangeKm={rangeKm}
+          sortMode={sortMode}
+          onSortModeChange={setSortMode}
+          loading={locationLoading}
+        />
+      ) : (
+        <section className="border-t border-slate-200 bg-white px-4 py-6 text-center text-sm text-slate-600">
+          List disembunyikan. Tukar ke mod “List” atau “Map + List” untuk lihat cadangan hentian.
+        </section>
+      )}
 
       <section className="px-4 pb-5 pt-2 text-[11px] text-slate-500">
         <p className="inline-flex items-center gap-1">

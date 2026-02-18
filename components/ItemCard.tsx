@@ -10,6 +10,12 @@ type ItemCardProps = {
   disabled: boolean;
 };
 
+function urgencyClass(eta: number): string {
+  if (eta < 10) return 'bg-emerald-100 text-emerald-700';
+  if (eta <= 20) return 'bg-amber-100 text-amber-700';
+  return 'bg-slate-100 text-slate-700';
+}
+
 export default function ItemCard({ item, onSelect, disabled }: ItemCardProps) {
   const onRouteLabel =
     item.onRouteConfidence === 'RNR_LINKED'
@@ -17,6 +23,8 @@ export default function ItemCard({ item, onSelect, disabled }: ItemCardProps) {
       : item.onRouteConfidence === 'CORRIDOR_VERIFIED'
         ? 'On Corridor'
         : 'R&R Site';
+
+  const eta = item.etaMinutes ?? 0;
 
   return (
     <div
@@ -43,14 +51,14 @@ export default function ItemCard({ item, onSelect, disabled }: ItemCardProps) {
         </div>
       </div>
 
-      <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-700">
+      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-700">
         <span className="inline-flex items-center gap-1">
           <MapPinned className="h-3.5 w-3.5" />
           {(item.distanceKm ?? 0).toFixed(1)} km
         </span>
-        <span className="inline-flex items-center gap-1">
+        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold ${urgencyClass(eta)}`}>
           <Clock3 className="h-3.5 w-3.5" />
-          {item.etaMinutes ?? 0} min
+          {eta} min
         </span>
         {item.kind === 'FUEL' && item.brand ? (
           <span className="inline-flex items-center gap-1">
@@ -65,7 +73,7 @@ export default function ItemCard({ item, onSelect, disabled }: ItemCardProps) {
           type="button"
           onClick={() => onSelect(item)}
           disabled={disabled}
-          className="flex-1 rounded-xl bg-brand-500 px-3 py-2 text-xs font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="min-h-[44px] flex-1 rounded-xl bg-brand-500 px-3 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
           Lihat Detail
         </button>
@@ -73,7 +81,7 @@ export default function ItemCard({ item, onSelect, disabled }: ItemCardProps) {
           href={buildNavigationUrl({ lat: item.lat, lng: item.lng })}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:border-slate-400"
+          className="inline-flex min-h-[44px] items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:border-slate-400"
         >
           <Navigation className="h-3.5 w-3.5" />
           Navigasi

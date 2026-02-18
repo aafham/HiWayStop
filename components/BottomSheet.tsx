@@ -28,6 +28,8 @@ export default function BottomSheet({
   onSortModeChange,
   loading,
 }: BottomSheetProps) {
+  const selectedEta = selected?.etaMinutes ?? 0;
+  const selectedEtaClass = selectedEta < 10 ? 'bg-emerald-100 text-emerald-700' : selectedEta <= 20 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700';
   const noFuelInRange =
     rangeKm !== null &&
     rangeKm > 0 &&
@@ -47,8 +49,9 @@ export default function BottomSheet({
         <div className="mb-4 rounded-2xl border border-brand-100 bg-brand-50 p-3">
           <p className="text-sm font-bold text-brand-900">{selected.name}</p>
           <p className="text-xs text-brand-900/80">
-            {selected.highwayId} - {selected.direction} - {(selected.distanceKm ?? 0).toFixed(1)} km - ETA {selected.etaMinutes ?? 0} min
+            {selected.highwayId} - {selected.direction} - {(selected.distanceKm ?? 0).toFixed(1)} km
           </p>
+          <span className={`mt-2 inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${selectedEtaClass}`}>ETA {selectedEta} min</span>
           <p className="mt-1 text-xs font-semibold text-brand-900/80">Keyakinan route: {onRouteLabel}</p>
           {selected.facilities ? (
             <p className="mt-2 text-xs text-brand-900/80">
