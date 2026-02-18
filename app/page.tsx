@@ -252,22 +252,6 @@ function HomePageContent() {
     setSortMode('DISTANCE');
   };
 
-  const applyPreset = (preset: 'FUEL_FIRST' | 'FAMILY_STOP' | 'EV_ONLY') => {
-    if (preset === 'FUEL_FIRST') {
-      setViewMode('FUEL');
-      setSelectedBrands([]);
-      setFacilityFilter(defaultFacilities);
-      return;
-    }
-    if (preset === 'FAMILY_STOP') {
-      setViewMode('RNR');
-      setFacilityFilter({ surau: true, toilet: true, foodcourt: true, ev: false });
-      return;
-    }
-    setViewMode('ALL');
-    setFacilityFilter({ surau: false, toilet: false, foodcourt: false, ev: true });
-  };
-
   const fuelInRangeCount = useMemo(() => {
     if (!userLoc || !rangeKm || rangeKm <= 0) return null;
     const eligibleFuel = fuelPlaces.filter((item) => selectedBrands.length === 0 || (item.brand ? selectedBrands.includes(item.brand) : false));
@@ -402,7 +386,6 @@ function HomePageContent() {
           rangeKm={rangeKmInput}
           setRangeKm={setRangeKmInput}
           onResetFilters={resetFilters}
-          onApplyPreset={applyPreset}
           fuelInRangeCount={fuelInRangeCount}
           totalFuelCount={totalFuelCount}
           selectAllBrands={selectAllBrands}

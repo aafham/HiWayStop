@@ -39,8 +39,7 @@ It shows only highway-relevant R&R areas and fuel stations using corridor-based 
 - Fuel brand filters (multi-select)
 - R&R facilities filters (multi-select)
 - Corridor slider (`200m - 800m`)
-- Fuel range input + quick presets
-- Quick presets: `Fuel First`, `Family Stop`, `EV Only`
+- Fuel range input
 - `Select all`, `Clear all`, `Reset`
 - Sticky active-filter summary (shown when filters are collapsed)
 

@@ -19,7 +19,6 @@ type FilterPanelProps = {
   rangeKm: string;
   setRangeKm: (value: string) => void;
   onResetFilters: () => void;
-  onApplyPreset: (preset: 'FUEL_FIRST' | 'FAMILY_STOP' | 'EV_ONLY') => void;
   fuelInRangeCount: number | null;
   totalFuelCount: number;
   selectAllBrands: () => void;
@@ -49,7 +48,6 @@ export default function FilterPanel({
   rangeKm,
   setRangeKm,
   onResetFilters,
-  onApplyPreset,
   fuelInRangeCount,
   totalFuelCount,
   selectAllBrands,
@@ -86,15 +84,6 @@ export default function FilterPanel({
             <Undo2 className="h-3.5 w-3.5" />
             Reset
           </button>
-        </div>
-      </div>
-
-      <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-3.5 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Quick Presets</p>
-        <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={() => onApplyPreset('FUEL_FIRST')} className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-brand-300 hover:bg-brand-50">Fuel First</button>
-          <button type="button" onClick={() => onApplyPreset('FAMILY_STOP')} className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-brand-300 hover:bg-brand-50">Family Stop</button>
-          <button type="button" onClick={() => onApplyPreset('EV_ONLY')} className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-brand-300 hover:bg-brand-50">EV Only</button>
         </div>
       </div>
 
