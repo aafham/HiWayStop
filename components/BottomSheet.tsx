@@ -1,4 +1,4 @@
-'use client';
+ï»¿'use client';
 
 import { AlertTriangle, Navigation } from 'lucide-react';
 import { PlaceItem } from '@/types';
@@ -33,7 +33,7 @@ export default function BottomSheet({
         <div className="mb-4 rounded-2xl border border-brand-100 bg-brand-50 p-3">
           <p className="text-sm font-bold text-brand-900">{selected.name}</p>
           <p className="text-xs text-brand-900/80">
-            {selected.highwayId} • {selected.direction} • {(selected.distanceKm ?? 0).toFixed(1)} km • ETA{' '}
+            {selected.highwayId} â€¢ {selected.direction} â€¢ {(selected.distanceKm ?? 0).toFixed(1)} km â€¢ ETA{' '}
             {selected.etaMinutes ?? 0} min
           </p>
           {selected.facilities ? (
@@ -112,3 +112,4 @@ export default function BottomSheet({
     </section>
   );
 }
+

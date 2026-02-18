@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { Clock3, Fuel, MapPinned } from 'lucide-react';
 import { PlaceItem } from '@/types';
@@ -25,7 +25,7 @@ export default function ItemCard({ item, onSelect, disabled }: ItemCardProps) {
         <div>
           <p className="font-semibold text-slate-900">{item.name}</p>
           <p className="mt-1 text-xs text-slate-600">
-            {item.highwayId} � {item.direction}
+            {item.highwayId} • {item.direction}
           </p>
         </div>
         <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-700">
@@ -52,3 +52,4 @@ export default function ItemCard({ item, onSelect, disabled }: ItemCardProps) {
     </button>
   );
 }
+

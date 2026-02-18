@@ -1,4 +1,4 @@
-import { Highway, LatLng, PlaceItem, Station } from '@/types';
+﻿import { Highway, LatLng, PlaceItem, Station } from '@/types';
 
 const EARTH_RADIUS_M = 6371000;
 
@@ -230,3 +230,4 @@ export function runGeoSelfCheck(): void {
     console.warn('[geo-check] Invalid distance or ETA calculation');
   }
 }
+

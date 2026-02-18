@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { LocateFixed } from 'lucide-react';
 
@@ -35,3 +35,4 @@ export default function TopBar({ locationStatus, onUseLocation, loading }: TopBa
     </header>
   );
 }
+

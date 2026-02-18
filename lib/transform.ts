@@ -1,4 +1,4 @@
-import { PlaceItem, Rnr, Station } from '@/types';
+﻿import { PlaceItem, Rnr, Station } from '@/types';
 
 export function rnrToPlace(rnr: Rnr): PlaceItem {
   return {
@@ -28,3 +28,4 @@ export function stationToPlace(station: Station): PlaceItem {
     sourceId: station.id,
   };
 }
+

@@ -1,4 +1,4 @@
-export type LatLng = {
+﻿export type LatLng = {
   lat: number;
   lng: number;
 };
@@ -64,3 +64,4 @@ export type PlaceItem = {
   brand?: string;
   sourceId: string;
 };
+

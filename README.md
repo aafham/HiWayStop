@@ -1,4 +1,4 @@
-# HiWayStop
+﻿# HiWayStop
 
 Tagline: **Cari R&R & minyak-khusus di lebuh raya.**
 
@@ -166,3 +166,4 @@ Reka bentuk sekarang memudahkan migrasi:
 - Tiada API berbayar digunakan.
 - Tiada data station luar highway dipaparkan jika gagal highway-only rule.
 - Destinasi masih placeholder untuk fasa routing seterusnya.
+

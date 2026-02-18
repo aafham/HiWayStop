@@ -1,4 +1,4 @@
-@tailwind base;
+﻿@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -22,3 +22,4 @@ body {
 input[type='range'] {
   accent-color: #159570;
 }
+

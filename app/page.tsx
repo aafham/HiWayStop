@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
@@ -268,3 +268,4 @@ export default function HomePage() {
     </main>
   );
 }
+
