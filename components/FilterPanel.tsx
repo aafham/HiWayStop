@@ -64,7 +64,7 @@ export default function FilterPanel({
   const rangeSuggestions = ['100', '200', '350', '500'];
 
   return (
-    <section className="space-y-4 border-b border-slate-200 bg-gradient-to-b from-white to-slate-50 px-4 py-4">
+    <section className="space-y-4 border-b border-slate-200/70 bg-gradient-to-b from-white/90 to-slate-50/70 px-4 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
           <SlidersHorizontal className="h-4 w-4" />
@@ -85,16 +85,16 @@ export default function FilterPanel({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+      <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Quick Presets</p>
         <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={() => onApplyPreset('FUEL_FIRST')} className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-400">Fuel First</button>
-          <button type="button" onClick={() => onApplyPreset('FAMILY_STOP')} className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-400">Family Stop</button>
-          <button type="button" onClick={() => onApplyPreset('EV_ONLY')} className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-400">EV Only</button>
+          <button type="button" onClick={() => onApplyPreset('FUEL_FIRST')} className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-brand-300 hover:bg-brand-50">Fuel First</button>
+          <button type="button" onClick={() => onApplyPreset('FAMILY_STOP')} className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-brand-300 hover:bg-brand-50">Family Stop</button>
+          <button type="button" onClick={() => onApplyPreset('EV_ONLY')} className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-brand-300 hover:bg-brand-50">EV Only</button>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
+      <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-2 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
         <div className="grid grid-cols-3 gap-2">
           {viewModes.map((mode) => (
             <button
@@ -111,11 +111,11 @@ export default function FilterPanel({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+      <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
         <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">Destination (optional)</label>
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="Example: Ipoh / Kuantan" className="w-full rounded-xl border border-slate-300 bg-slate-50 py-2 pl-9 pr-3 text-sm outline-none ring-brand-500 focus:border-brand-500 focus:bg-white focus:ring" />
+          <input value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="Example: Ipoh / Kuantan" className="w-full rounded-xl border border-slate-300 bg-slate-50 py-2.5 pl-9 pr-3 text-sm outline-none ring-brand-500 focus:border-brand-500 focus:bg-white focus:ring" />
         </div>
         <div className="mt-2 flex flex-wrap gap-2">
           {destinationSuggestions.map((item) => (
@@ -125,7 +125,7 @@ export default function FilterPanel({
         <p className="mt-2 text-[11px] text-slate-500">Full destination routing is not active yet. This field currently stores trip context.</p>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+      <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
         <div className="mb-2 flex items-center justify-between">
           <p className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-500"><Fuel className="h-3.5 w-3.5" />Fuel Brands</p>
           <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">{selectedBrands.length} selected</span>
@@ -148,7 +148,7 @@ export default function FilterPanel({
         {selectedBrands.length > 0 ? <p className="mt-2 text-[11px] text-slate-500">Selected: {summarize(selectedBrands)}</p> : null}
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+      <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
         <div className="mb-2 flex items-center justify-between">
           <p className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-500"><Sparkles className="h-3.5 w-3.5" />R&R Facilities</p>
           <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">{activeFacilitiesCount} selected</span>
@@ -171,7 +171,7 @@ export default function FilterPanel({
         {activeFacilitiesCount > 0 ? <p className="mt-2 text-[11px] text-slate-500">Selected: {summarize((['surau', 'toilet', 'foodcourt', 'ev'] as Array<keyof FacilityFlags>).filter((k) => facilities[k]).map((k) => k.toUpperCase()))}</p> : null}
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+      <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
         <div className="mb-2 flex items-center justify-between text-xs font-semibold text-slate-600">
           <span className="inline-flex items-center gap-1"><Route className="h-3.5 w-3.5" />Corridor buffer</span>
           <span className="rounded-full bg-brand-50 px-2 py-0.5 text-brand-700">{bufferMeters}m</span>
@@ -184,7 +184,7 @@ export default function FilterPanel({
         <p className="mt-1 text-[11px] text-slate-500">Larger buffer = more stations may pass the highway filter.</p>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+      <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
         <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500" htmlFor="range">Fuel Range Mode (km)</label>
         <div className="relative">
           <input id="range" type="number" min={0} value={rangeKm} onChange={(e) => setRangeKm(e.target.value)} placeholder="Example: 350" className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 pr-12 text-sm outline-none ring-brand-500 focus:border-brand-500 focus:bg-white focus:ring" />

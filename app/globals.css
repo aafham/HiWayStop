@@ -4,15 +4,24 @@
 
 :root {
   color-scheme: light;
+  --surface-1: #ffffff;
+  --surface-2: #f8fafc;
+  --stroke-soft: #e2e8f0;
+  --text-main: #0f172a;
+  --text-subtle: #64748b;
 }
 
 html,
 body {
   margin: 0;
   padding: 0;
-  background: linear-gradient(180deg, #f6faf8 0%, #f8fafc 40%, #f3f7fb 100%);
-  color: #0f172a;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  min-height: 100%;
+  background:
+    radial-gradient(circle at 10% 0%, #eaf7f2 0%, transparent 32%),
+    radial-gradient(circle at 90% 6%, #eef5ff 0%, transparent 26%),
+    linear-gradient(180deg, #f8fbff 0%, #f5f8fc 100%);
+  color: var(--text-main);
+  font-family: Poppins, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 * {
@@ -21,6 +30,11 @@ body {
 
 input[type='range'] {
   accent-color: #159570;
+}
+
+a,
+button {
+  transition: all 180ms ease;
 }
 
 @keyframes filter-pop {

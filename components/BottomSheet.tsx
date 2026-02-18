@@ -26,16 +26,16 @@ export default function BottomSheet({ nearest, nextRnR, nextFuel, selected, onSe
     selected?.onRouteConfidence === 'RNR_LINKED' ? 'R&R-linked' : selected?.onRouteConfidence === 'CORRIDOR_VERIFIED' ? 'On Corridor' : 'R&R Site';
 
   return (
-    <section className="max-h-[55vh] overflow-y-auto rounded-t-3xl bg-white p-4 shadow-sheet">
+    <section className="max-h-[58vh] overflow-y-auto rounded-t-3xl border-t border-slate-200/80 bg-white/95 p-4 shadow-sheet backdrop-blur">
       {selected ? (
-        <div className="mb-4 rounded-2xl border border-brand-100 bg-brand-50 p-3">
+        <div className="mb-4 rounded-2xl border border-brand-100 bg-gradient-to-br from-brand-50 to-white p-3.5">
           <p className="text-sm font-bold text-brand-900">{selected.name}</p>
           <p className="text-xs text-brand-900/80">{selected.highwayId} - {selected.direction} - {(selected.distanceKm ?? 0).toFixed(1)} km</p>
           <span className={`mt-2 inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${selectedEtaClass}`}>ETA {selectedEta} min</span>
           <p className="mt-1 text-xs font-semibold text-brand-900/80">Route confidence: {onRouteLabel}</p>
           {selected.facilities ? <p className="mt-2 text-xs text-brand-900/80">Facilities: {Object.entries(selected.facilities).filter(([, value]) => value).map(([key]) => key).join(', ') || 'None'}</p> : null}
           {selected.kind === 'FUEL' && selected.brand ? <p className="mt-1 text-xs text-brand-900/80">Brand: {selected.brand}</p> : null}
-          <a href={buildNavigationUrl({ lat: selected.lat, lng: selected.lng })} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 rounded-lg bg-brand-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-700"><Navigation className="h-3.5 w-3.5" />Navigate here</a>
+          <a href={buildNavigationUrl({ lat: selected.lat, lng: selected.lng })} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 rounded-lg bg-brand-500 px-3 py-1.5 text-xs font-semibold text-white shadow-[0_8px_20px_rgba(21,149,112,0.25)] hover:-translate-y-[1px] hover:bg-brand-700"><Navigation className="h-3.5 w-3.5" />Navigate here</a>
         </div>
       ) : null}
 
@@ -49,7 +49,7 @@ export default function BottomSheet({ nearest, nextRnR, nextFuel, selected, onSe
       <div>
         <div className="mb-2 flex items-center justify-between gap-2">
           <h2 className="text-sm font-bold text-slate-900">Nearest to you (Top 10)</h2>
-          <label className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700">
+          <label className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-sm">
             <ArrowUpDown className="h-3.5 w-3.5" />
             <select value={sortMode} onChange={(e) => onSortModeChange(e.target.value as SortMode)} className="bg-transparent outline-none">
               <option value="DISTANCE">Nearest</option>

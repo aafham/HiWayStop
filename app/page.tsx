@@ -321,14 +321,14 @@ function HomePageContent() {
   }, [fuelInRangeCount, priorityNextStop?.distanceKm, totalFuelCount]);
 
   return (
-    <main className="mx-auto min-h-screen max-w-5xl bg-white shadow-sm">
+    <main className="mx-auto min-h-screen max-w-5xl overflow-hidden bg-white/70 shadow-[0_18px_60px_rgba(15,23,42,0.12)] ring-1 ring-slate-200/80 backdrop-blur">
       <TopBar locationStatus={locationStatus} onUseLocation={useCurrentLocation} loading={locationLoading} />
 
-      <section className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-[11px] font-semibold text-amber-900">
+      <section className="border-b border-amber-200/80 bg-amber-50/90 px-4 py-2 text-[11px] font-semibold text-amber-900">
         <p className="inline-flex items-center gap-1"><ShieldAlert className="h-3.5 w-3.5" />For safety, do not use this app while driving. Use it only when stopped.</p>
       </section>
 
-      <section className="sticky top-[106px] z-30 border-b border-slate-200 bg-white/95 px-4 py-2 backdrop-blur">
+      <section className="sticky top-[106px] z-30 border-b border-slate-200/80 bg-white/90 px-4 py-2 backdrop-blur-xl">
         <div className="inline-flex rounded-full bg-slate-100 p-1">
           <button type="button" onClick={() => { setShowMap(true); setShowList(false); }} className={`rounded-full px-3 py-1 text-xs font-semibold ${showMap && !showList ? 'bg-brand-500 text-white' : 'text-slate-700'}`}>Map</button>
           <button type="button" onClick={() => { setShowMap(false); setShowList(true); }} className={`rounded-full px-3 py-1 text-xs font-semibold ${!showMap && showList ? 'bg-brand-500 text-white' : 'text-slate-700'}`}>List</button>
@@ -336,7 +336,7 @@ function HomePageContent() {
         </div>
       </section>
 
-      <section className="grid gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3 sm:grid-cols-2">
+      <section className="grid gap-2 border-b border-slate-200/70 bg-slate-50/70 px-4 py-3 sm:grid-cols-2">
         {locationLoading ? (
           <>
             <div className="h-16 animate-pulse rounded-xl border border-slate-200 bg-slate-100" />
@@ -344,11 +344,11 @@ function HomePageContent() {
           </>
         ) : (
           <>
-            <div className="rounded-xl border border-slate-200 bg-white p-3">
+            <div className="rounded-xl border border-slate-200/80 bg-white/95 p-3.5 shadow-[0_8px_20px_rgba(15,23,42,0.05)]">
               <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Nearest R&R</p>
               {nearestRnr ? <><p className="mt-1 text-sm font-semibold text-slate-900">{nearestRnr.name}</p><p className="text-xs text-slate-600">{nearestRnr.distanceKm.toFixed(1)} km - ETA {nearestRnr.etaMinutes} min</p></> : <p className="mt-1 text-xs text-slate-500">Enable location to see nearest R&R.</p>}
             </div>
-            <div className="rounded-xl border border-slate-200 bg-white p-3">
+            <div className="rounded-xl border border-slate-200/80 bg-white/95 p-3.5 shadow-[0_8px_20px_rgba(15,23,42,0.05)]">
               <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Nearest Fuel Station</p>
               {nearestFuel ? <><p className="mt-1 text-sm font-semibold text-slate-900">{nearestFuel.name}</p><p className="text-xs text-slate-600">{nearestFuel.distanceKm.toFixed(1)} km - ETA {nearestFuel.etaMinutes} min{nearestFuel.brand ? ` - ${nearestFuel.brand}` : ''}</p></> : <p className="mt-1 text-xs text-slate-500">Enable location to see nearest fuel station.</p>}
             </div>
@@ -357,8 +357,8 @@ function HomePageContent() {
       </section>
 
       {isFilterCompact ? (
-        <section className="border-b border-slate-200 bg-slate-50 px-4 py-2">
-          <button type="button" onClick={() => setIsFilterExpanded((prev) => !prev)} className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700">
+        <section className="border-b border-slate-200/70 bg-slate-50/70 px-4 py-2">
+          <button type="button" onClick={() => setIsFilterExpanded((prev) => !prev)} className="flex w-full items-center justify-between rounded-xl border border-slate-200/80 bg-white/95 px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm">
             <span className={`inline-flex items-center gap-2 rounded-full px-2 py-1 ${filterFlash ? 'filter-pop bg-brand-100 text-brand-700' : 'bg-slate-100'}`}>{activeFiltersCount} active filters</span>
             <span className="inline-flex items-center gap-1">{isFilterExpanded ? <PanelTopOpen className="h-4 w-4" /> : <PanelBottomOpen className="h-4 w-4" />}{isFilterExpanded ? 'Hide Filters' : 'Show Filters'}</span>
           </button>
@@ -392,7 +392,7 @@ function HomePageContent() {
       ) : null}
 
       {activeFiltersCount > 0 ? (
-        <section className="sticky top-[146px] z-20 border-b border-slate-200 bg-white/95 px-4 py-2 backdrop-blur">
+        <section className="sticky top-[146px] z-20 border-b border-slate-200/70 bg-white/85 px-4 py-2 backdrop-blur-xl">
           <div className="flex flex-wrap items-center gap-2 text-[11px]">
             <span className={`rounded-full px-2 py-0.5 font-semibold text-white ${filterFlash ? 'filter-pop bg-brand-500' : 'bg-slate-900'}`}>{activeFiltersCount} active filters</span>
             <span className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">Mode: {viewMode}</span>
@@ -405,8 +405,8 @@ function HomePageContent() {
       ) : null}
 
       {priorityNextStop ? (
-        <section className="border-b border-slate-200 bg-white px-4 py-3">
-          <div className="rounded-2xl border border-brand-200 bg-brand-50 p-3">
+        <section className="border-b border-slate-200/70 bg-white/80 px-4 py-3">
+          <div className="rounded-2xl border border-brand-200/80 bg-gradient-to-br from-brand-50 to-white p-3.5 shadow-[0_10px_28px_rgba(21,149,112,0.12)]">
             <p className="text-[11px] font-bold uppercase tracking-wide text-brand-700">Next Stop On Route</p>
             <p className="mt-1 text-sm font-bold text-brand-900">{priorityNextStop.name}</p>
             <p className="text-xs text-brand-900/80">{(priorityNextStop.distanceKm ?? 0).toFixed(1)} km - ETA {priorityNextStop.etaMinutes ?? 0} min</p>
@@ -414,8 +414,8 @@ function HomePageContent() {
         </section>
       ) : null}
 
-      <section className="border-b border-slate-200 bg-slate-50 px-4 py-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-3">
+      <section className="border-b border-slate-200/70 bg-slate-50/70 px-4 py-3">
+        <div className="rounded-2xl border border-slate-200/80 bg-white/95 p-3.5 shadow-[0_10px_24px_rgba(15,23,42,0.05)]">
           <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Current Trip</p>
           <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-slate-700">
             <div className="rounded-lg bg-slate-50 p-2"><p className="font-semibold">Next Stop</p><p>{tripStats.nextStopKm !== null ? `${tripStats.nextStopKm.toFixed(1)} km` : 'Not available'}</p></div>
@@ -424,14 +424,14 @@ function HomePageContent() {
             <div className="rounded-lg bg-slate-50 p-2"><p className="font-semibold">Rest Suggestion</p><p>Every {tripStats.restAdviceMinutes} min</p></div>
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
-            <button type="button" onClick={() => { if (priorityNextStop) setSelectedPlace(priorityNextStop); }} className="rounded-full bg-brand-500 px-3 py-1 text-[11px] font-semibold text-white">Set next stop</button>
+            <button type="button" onClick={() => { if (priorityNextStop) setSelectedPlace(priorityNextStop); }} className="rounded-full bg-brand-500 px-3 py-1 text-[11px] font-semibold text-white shadow-[0_8px_20px_rgba(21,149,112,0.25)] hover:-translate-y-[1px]">Set next stop</button>
             <button type="button" onClick={() => { setViewMode('FUEL'); setShowList(true); setShowMap(true); }} className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-700">Find fuel in range</button>
           </div>
         </div>
       </section>
 
       {!userLoc ? (
-        <section className="flex h-[45vh] flex-col items-center justify-center gap-3 border-b border-slate-200 bg-slate-50 px-4 text-center">
+        <section className="flex h-[42vh] flex-col items-center justify-center gap-3 border-b border-slate-200/70 bg-slate-50/70 px-4 text-center">
           {locationLoading ? <div className="h-24 w-full max-w-md animate-pulse rounded-2xl bg-slate-200" /> : <LocateFixed className="h-8 w-8 text-slate-500" />}
           <p className="text-sm font-semibold text-slate-700">Tap "Use my location" to start.</p>
           <p className="text-xs text-slate-500">Only highway data and highway-only fuel stations are shown.</p>
@@ -441,7 +441,7 @@ function HomePageContent() {
       ) : null}
 
       {userLoc && !direction ? (
-        <section className="border-b border-slate-200 bg-amber-50 px-4 py-3">
+        <section className="border-b border-slate-200/70 bg-amber-50/70 px-4 py-3">
           <p className="mb-2 inline-flex items-center gap-1 text-xs font-semibold text-amber-900"><Compass className="h-4 w-4" />Travel direction could not be detected. Please choose manually.</p>
           <div className="flex flex-wrap gap-2">
             {(['NORTH', 'SOUTH', 'EAST', 'WEST'] as const).map((value) => (
@@ -452,7 +452,7 @@ function HomePageContent() {
       ) : null}
 
       {userLoc && places.length === 0 ? (
-        <section className="space-y-2 border-b border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-700">
+        <section className="space-y-2 border-b border-slate-200/70 bg-slate-50/70 px-4 py-3 text-xs text-slate-700">
           <p className="inline-flex items-center gap-2 font-semibold"><MapPinOff className="h-4 w-4" />{emptyReason}</p>
           <div className="flex flex-wrap gap-2">
             {selectedBrands.length > 0 ? <button type="button" onClick={() => setSelectedBrands([])} className="rounded-full bg-white px-3 py-1 font-semibold text-slate-700 ring-1 ring-slate-300">Reset brands</button> : null}
@@ -467,21 +467,21 @@ function HomePageContent() {
       {showList ? (
         <BottomSheet nearest={nearestTop10} nextRnR={nextByDirection.rnr} nextFuel={nextByDirection.fuel} selected={selectedPlace} onSelect={setSelectedPlace} rangeKm={rangeKm} sortMode={sortMode} onSortModeChange={setSortMode} loading={locationLoading} />
       ) : (
-        <section className="border-t border-slate-200 bg-white px-4 py-6 text-center text-sm text-slate-600">List is hidden. Switch to "List" or "Map + List" to view stop suggestions.</section>
+        <section className="border-t border-slate-200/70 bg-white/80 px-4 py-6 text-center text-sm text-slate-600">List is hidden. Switch to "List" or "Map + List" to view stop suggestions.</section>
       )}
 
       {showMapPeek && showList ? (
-        <button type="button" onClick={() => { setShowMap(true); document.getElementById('map-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} className="fixed bottom-24 right-4 z-40 rounded-full bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-lg">View map</button>
+        <button type="button" onClick={() => { setShowMap(true); document.getElementById('map-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} className="fixed bottom-24 right-4 z-40 rounded-full bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(21,149,112,0.35)] hover:-translate-y-[1px]">View map</button>
       ) : null}
 
       {selectedPlace ? (
-        <section className="fixed bottom-3 left-1/2 z-40 w-[calc(100%-1.5rem)] max-w-3xl -translate-x-1/2 rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-xl backdrop-blur">
+        <section className="fixed bottom-3 left-1/2 z-40 w-[calc(100%-1.5rem)] max-w-3xl -translate-x-1/2 rounded-2xl border border-slate-200/80 bg-white/95 p-3 shadow-[0_18px_44px_rgba(15,23,42,0.22)] backdrop-blur-xl">
           <div className="flex items-center justify-between gap-2">
             <div>
               <p className="text-xs font-bold text-slate-900">Selected: {selectedPlace.name}</p>
               <p className="text-[11px] text-slate-600">{(selectedPlace.distanceKm ?? 0).toFixed(1)} km - ETA {selectedPlace.etaMinutes ?? 0} min</p>
             </div>
-            <a href={buildNavigationUrl({ lat: selectedPlace.lat, lng: selectedPlace.lng })} target="_blank" rel="noreferrer" className="inline-flex min-h-[44px] items-center gap-1 rounded-xl bg-brand-500 px-3 py-2 text-sm font-semibold text-white"><Navigation className="h-3.5 w-3.5" />Navigate</a>
+            <a href={buildNavigationUrl({ lat: selectedPlace.lat, lng: selectedPlace.lng })} target="_blank" rel="noreferrer" className="inline-flex min-h-[44px] items-center gap-1 rounded-xl bg-brand-500 px-3 py-2 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(21,149,112,0.25)] hover:-translate-y-[1px]"><Navigation className="h-3.5 w-3.5" />Navigate</a>
           </div>
         </section>
       ) : null}
@@ -500,3 +500,4 @@ export default function HomePage() {
     </Suspense>
   );
 }
+
