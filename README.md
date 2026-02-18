@@ -41,7 +41,7 @@ It shows only highway-relevant R&R areas and fuel stations using corridor-based 
 - Corridor slider (`200m - 800m`)
 - Fuel range input
 - `Select all`, `Clear all`, `Reset`
-- Sticky active-filter summary (shown when filters are collapsed)
+- Compact active-filter tags shown under the filter toggle
 
 ### Map + List UX
 - View mode switch: `Map`, `List`, `Map + List`
@@ -52,16 +52,25 @@ It shows only highway-relevant R&R areas and fuel stations using corridor-based 
 - Empty-map hint when filters hide all pins
 - Bottom sheet list with skeleton loading
 - Floating `View map` shortcut when deep in list
+- Selected list item highlight + auto-scroll support
 
 ### Nearest, Next, Trip
 - Nearest Top 10
 - Next along direction for R&R + fuel
 - Priority card: `Next Stop On Route`
 - Trip panel:
-  - next stop distance
-  - next ETA
-  - fuel in range
-  - rest suggestion
+  - auto next-stop selection (with fuel-priority logic when fuel range is low)
+  - live next ETA from selected/priority stop
+  - fuel-in-range ratio + warning when `0` in range
+  - dynamic rest suggestion from ETA
+  - collapsible trip panel UI
+  - actionable buttons:
+    - `Set next stop` selects and focuses the target item
+    - `Find fuel in range` switches to fuel mode and focuses list
+  - trip status badge:
+    - `Ready`
+    - `Needs direction`
+    - `Fuel risk`
 
 ### Decision Aids
 - Sort by:
@@ -79,6 +88,9 @@ It shows only highway-relevant R&R areas and fuel stations using corridor-based 
   - `Open nearest`
   - `Open nearest fuel`
   - `Open nearest R&R`
+- Selected stop persistence:
+  - query param `sel=<itemId>`
+  - localStorage fallback (`hiwaystop:selected-place-id`)
 
 ### Smart Empty State
 - Context-aware "no result" reason
@@ -213,6 +225,17 @@ Outputs:
   - improved uncertain highway status emphasis in top bar
   - map empty-state hint + polished legend card
   - quick open actions in list when no selection is active
+  - removed quick preset block from filters for cleaner layout
+  - merged top highway + safety message into one compact status card
+  - removed duplicate highway status line in header
+  - phase 1 current-trip logic activation:
+    - auto next stop + live ETA + dynamic rest suggestion
+    - actionable trip buttons (`Set next stop`, `Find fuel in range`)
+    - fuel-range warning in trip card
+  - phase 2 current-trip upgrade:
+    - trip status badge (`Ready` / `Needs direction` / `Fuel risk`)
+    - selected-stop persistence via query + localStorage
+    - selected-item highlight and list auto-focus behavior
 
 ## Notes
 

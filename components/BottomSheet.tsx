@@ -78,7 +78,7 @@ export default function BottomSheet({ nearest, nextRnR, nextFuel, selected, onSe
           <div className="space-y-2">{Array.from({ length: 3 }).map((_, idx) => <div key={idx} className="h-24 animate-pulse rounded-2xl border border-slate-200 bg-slate-100" />)}</div>
         ) : (
           <div className="space-y-1.5">
-            {nearest.map((item) => <ItemCard key={item.id} item={item} onSelect={onSelect} disabled={rangeKm !== null && rangeKm > 0 && (item.distanceKm ?? 0) > rangeKm} />)}
+            {nearest.map((item) => <ItemCard key={item.id} item={item} onSelect={onSelect} selected={selected?.id === item.id} disabled={rangeKm !== null && rangeKm > 0 && (item.distanceKm ?? 0) > rangeKm} />)}
             {nearest.length === 0 ? <p className="text-xs text-slate-500">No matching data to show.</p> : null}
           </div>
         )}
@@ -87,7 +87,7 @@ export default function BottomSheet({ nearest, nextRnR, nextFuel, selected, onSe
       <div className="mt-4">
         <h2 className="mb-2 text-sm font-bold text-slate-900">Next along direction - R&R</h2>
         <div className="space-y-1.5">
-          {nextRnR.map((item) => <ItemCard key={item.id} item={item} onSelect={onSelect} disabled={rangeKm !== null && rangeKm > 0 && (item.distanceKm ?? 0) > rangeKm} />)}
+          {nextRnR.map((item) => <ItemCard key={item.id} item={item} onSelect={onSelect} selected={selected?.id === item.id} disabled={rangeKm !== null && rangeKm > 0 && (item.distanceKm ?? 0) > rangeKm} />)}
           {nextRnR.length === 0 ? <p className="text-xs text-slate-500">No upcoming R&R found.</p> : null}
         </div>
       </div>
@@ -95,7 +95,7 @@ export default function BottomSheet({ nearest, nextRnR, nextFuel, selected, onSe
       <div className="mt-4">
         <h2 className="mb-2 text-sm font-bold text-slate-900">Next along direction - Fuel</h2>
         <div className="space-y-1.5">
-          {nextFuel.map((item) => <ItemCard key={item.id} item={item} onSelect={onSelect} disabled={rangeKm !== null && rangeKm > 0 && (item.distanceKm ?? 0) > rangeKm} />)}
+          {nextFuel.map((item) => <ItemCard key={item.id} item={item} onSelect={onSelect} selected={selected?.id === item.id} disabled={rangeKm !== null && rangeKm > 0 && (item.distanceKm ?? 0) > rangeKm} />)}
           {nextFuel.length === 0 ? <p className="inline-flex items-center gap-1 text-xs text-slate-500"><Navigation className="h-3.5 w-3.5" />No upcoming fuel stations found.</p> : null}
         </div>
       </div>

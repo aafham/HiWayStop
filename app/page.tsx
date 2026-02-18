@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { AlertTriangle, ChevronDown, ChevronUp, Compass, LocateFixed, MapPinOff, Navigation, ShieldAlert } from 'lucide-react';
@@ -75,6 +75,7 @@ function HomePageContent() {
   const [showList, setShowList] = useState(true);
   const [isFilterExpanded, setIsFilterExpanded] = useState(false);
   const [isTripExpanded, setIsTripExpanded] = useState(false);
+  const [pendingSelectedId, setPendingSelectedId] = useState<string | null>(null);
   const [filterFlash, setFilterFlash] = useState(false);
   const [showMapPeek, setShowMapPeek] = useState(false);
 
@@ -102,6 +103,8 @@ function HomePageContent() {
     if (range) setRangeKmInput(range);
     const sort = searchParams.get('sort');
     if (sort === 'DISTANCE' || sort === 'ETA' || sort === 'ALPHA' || sort === 'CONFIDENCE') setSortMode(sort);
+    const selectedId = searchParams.get('sel');
+    if (selectedId) setPendingSelectedId(selectedId);
     initializedFromQueryRef.current = true;
   }, [searchParams]);
 
@@ -116,9 +119,10 @@ function HomePageContent() {
     if (bufferMeters !== 400) p.set('buffer', String(bufferMeters));
     if (rangeKmInput.trim()) p.set('range', rangeKmInput.trim());
     if (sortMode !== 'DISTANCE') p.set('sort', sortMode);
+    if (selectedPlace?.id) p.set('sel', selectedPlace.id);
     const qs = p.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-  }, [bufferMeters, destination, facilityFilter, pathname, rangeKmInput, router, selectedBrands, sortMode, viewMode]);
+  }, [bufferMeters, destination, facilityFilter, pathname, rangeKmInput, router, selectedBrands, selectedPlace?.id, sortMode, viewMode]);
 
   const useCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -292,28 +296,91 @@ function HomePageContent() {
   }, [activeFacilities, bufferMeters, places.length, selectedBrands]);
 
   const priorityNextStop = useMemo(() => {
-    const candidates = [...nextByDirection.rnr, ...nextByDirection.fuel];
-    if (candidates.length === 0) return null;
-    return [...candidates].sort((a, b) => (a.distanceKm ?? 0) - (b.distanceKm ?? 0))[0];
-  }, [nextByDirection.fuel, nextByDirection.rnr]);
+    const nextFuel = [...nextByDirection.fuel].sort((a, b) => (a.distanceKm ?? 0) - (b.distanceKm ?? 0));
+    const nextRnr = [...nextByDirection.rnr].sort((a, b) => (a.distanceKm ?? 0) - (b.distanceKm ?? 0));
+    const allDirectional = [...nextFuel, ...nextRnr].sort((a, b) => (a.distanceKm ?? 0) - (b.distanceKm ?? 0));
+    const shouldPrioritizeFuel = rangeKm !== null && fuelInRangeCount !== null && fuelInRangeCount <= 1;
+    if (shouldPrioritizeFuel && nextFuel.length > 0) return nextFuel[0];
+    if (allDirectional.length > 0) return allDirectional[0];
+    if (nearestTop10.length > 0) return nearestTop10[0];
+    return null;
+  }, [fuelInRangeCount, nearestTop10, nextByDirection.fuel, nextByDirection.rnr, rangeKm]);
 
   const tripStats = useMemo(() => {
-    const nextStopKm = priorityNextStop?.distanceKm ?? null;
+    const tripTarget = selectedPlace ?? priorityNextStop;
+    const nextStopKm = tripTarget?.distanceKm ?? null;
     const averageSpeedKmh = 90;
     const restAdviceMinutes = 120;
+    const nextStopEta = nextStopKm !== null ? getETA(nextStopKm, averageSpeedKmh) : null;
+    const restSuggestion =
+      nextStopEta === null ? 'Every 120 min' :
+        nextStopEta < 60 ? 'No immediate rest needed' :
+          nextStopEta <= 120 ? 'Plan short break' :
+            'Take a break soon';
     return {
       nextStopKm,
-      nextStopEta: nextStopKm !== null ? Math.round((nextStopKm / averageSpeedKmh) * 60) : null,
+      nextStopEta,
+      tripTargetName: tripTarget?.name ?? null,
       fuelInRange: fuelInRangeCount ?? totalFuelCount,
       totalFuel: totalFuelCount,
       restAdviceMinutes,
+      restSuggestion,
     };
-  }, [fuelInRangeCount, priorityNextStop?.distanceKm, totalFuelCount]);
+  }, [fuelInRangeCount, priorityNextStop, selectedPlace, totalFuelCount]);
   const hasTripData = tripStats.nextStopKm !== null || tripStats.nextStopEta !== null;
+  const tripStatus = useMemo(() => {
+    if (!direction) return { label: 'Needs direction', className: 'bg-amber-100 text-amber-800' };
+    if (rangeKm !== null && fuelInRangeCount === 0) return { label: 'Fuel risk', className: 'bg-rose-100 text-rose-700' };
+    if (selectedPlace || priorityNextStop) return { label: 'Ready', className: 'bg-emerald-100 text-emerald-700' };
+    return { label: 'Planning', className: 'bg-slate-100 text-slate-700' };
+  }, [direction, fuelInRangeCount, priorityNextStop, rangeKm, selectedPlace]);
 
   useEffect(() => {
     if (hasTripData) setIsTripExpanded(true);
   }, [hasTripData]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (selectedPlace?.id) window.localStorage.setItem('hiwaystop:selected-place-id', selectedPlace.id);
+    else window.localStorage.removeItem('hiwaystop:selected-place-id');
+  }, [selectedPlace?.id]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!initializedFromQueryRef.current) return;
+    if (selectedPlace || pendingSelectedId) return;
+    const saved = window.localStorage.getItem('hiwaystop:selected-place-id');
+    if (saved) setPendingSelectedId(saved);
+  }, [pendingSelectedId, selectedPlace]);
+
+  const enrichSelectedPlace = useCallback((item: PlaceItem): PlaceItem => {
+    if (item.distanceKm !== undefined && item.etaMinutes !== undefined) return item;
+    const distanceKm = userLoc ? haversineKm(userLoc, { lat: item.lat, lng: item.lng }) : item.distanceKm;
+    return {
+      ...item,
+      distanceKm,
+      etaMinutes: item.etaMinutes ?? (distanceKm !== undefined ? getETA(distanceKm) : undefined),
+    };
+  }, [userLoc]);
+
+  useEffect(() => {
+    if (!pendingSelectedId) return;
+    const candidate = [...nearestTop10, ...nextByDirection.rnr, ...nextByDirection.fuel, ...places].find((item) => item.id === pendingSelectedId);
+    if (!candidate) return;
+    setSelectedPlace(enrichSelectedPlace(candidate));
+    setPendingSelectedId(null);
+  }, [enrichSelectedPlace, nearestTop10, nextByDirection.fuel, nextByDirection.rnr, pendingSelectedId, places]);
+
+  const handleSelectPlace = useCallback((item: PlaceItem) => {
+    setPendingSelectedId(null);
+    setSelectedPlace(enrichSelectedPlace(item));
+  }, [enrichSelectedPlace]);
+
+  const focusSelectedInList = (itemId: string) => {
+    window.setTimeout(() => {
+      document.getElementById(`item-${itemId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 120);
+  };
 
   return (
     <main className="mx-auto min-h-screen max-w-5xl overflow-hidden bg-white/70 shadow-[0_18px_60px_rgba(15,23,42,0.12)] ring-1 ring-slate-200/80 backdrop-blur">
@@ -359,7 +426,7 @@ function HomePageContent() {
             <p className="text-xs text-slate-500">Only highway data and highway-only fuel stations are shown.</p>
           </div>
         ) : showMap ? (
-          <section id="map-section"><HighwayMap userLoc={userLoc} highways={highways} places={places} onSelect={setSelectedPlace} rangeKm={rangeKm} /></section>
+          <section id="map-section"><HighwayMap userLoc={userLoc} highways={highways} places={places} onSelect={handleSelectPlace} rangeKm={rangeKm} /></section>
         ) : null}
       </section>
 
@@ -425,6 +492,7 @@ function HomePageContent() {
           <button type="button" onClick={() => setIsTripExpanded((prev) => !prev)} className="flex w-full items-center justify-between text-left">
             <p className="text-xs font-semibold text-slate-600">Current trip</p>
             <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+              <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${tripStatus.className}`}>{tripStatus.label}</span>
               {hasTripData ? `${tripStats.nextStopKm?.toFixed(1) ?? '-'} km` : 'No next stop'}
               {isTripExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
             </span>
@@ -432,14 +500,43 @@ function HomePageContent() {
           {isTripExpanded ? (
             <>
               <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-slate-700">
-                <div className="rounded-lg bg-slate-50 p-2"><p className="font-semibold">Next stop</p><p>{tripStats.nextStopKm !== null ? `${tripStats.nextStopKm.toFixed(1)} km` : 'Not available'}</p></div>
+                <div className="rounded-lg bg-slate-50 p-2"><p className="font-semibold">Next stop</p><p>{tripStats.tripTargetName ?? 'Not available'}{tripStats.nextStopKm !== null ? ` (${tripStats.nextStopKm.toFixed(1)} km)` : ''}</p></div>
                 <div className="rounded-lg bg-slate-50 p-2"><p className="font-semibold">Next ETA</p><p>{tripStats.nextStopEta !== null ? `${tripStats.nextStopEta} min` : 'Not available'}</p></div>
                 <div className="rounded-lg bg-slate-50 p-2"><p className="font-semibold">Fuel in range</p><p>{tripStats.fuelInRange}/{tripStats.totalFuel}</p></div>
-                <div className="rounded-lg bg-slate-50 p-2"><p className="font-semibold">Rest suggestion</p><p>Every {tripStats.restAdviceMinutes} min</p></div>
+                <div className="rounded-lg bg-slate-50 p-2"><p className="font-semibold">Rest suggestion</p><p>{tripStats.restSuggestion}</p></div>
               </div>
+              {rangeKm !== null && fuelInRangeCount === 0 ? (
+                <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-2 py-1.5 text-xs font-semibold text-amber-900">No fuel station within current range. Suggestion: stop at nearest R&R ({nearestRnr?.name ?? 'not available'}) first.</p>
+              ) : null}
               <div className="mt-2 flex flex-wrap gap-2">
-                <button type="button" onClick={() => { if (priorityNextStop) setSelectedPlace(priorityNextStop); }} className="rounded-full bg-brand-500 px-3 py-1 text-[11px] font-semibold text-white shadow-[0_8px_20px_rgba(21,149,112,0.25)] hover:-translate-y-[1px]">Set next stop</button>
-                <button type="button" onClick={() => { setViewMode('FUEL'); setShowList(true); setShowMap(true); }} className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-700">Find fuel in range</button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!priorityNextStop) return;
+                    handleSelectPlace(priorityNextStop);
+                    setShowList(true);
+                    focusSelectedInList(priorityNextStop.id);
+                  }}
+                  className="rounded-full bg-brand-500 px-3 py-1 text-[11px] font-semibold text-white shadow-[0_8px_20px_rgba(21,149,112,0.25)] hover:-translate-y-[1px]"
+                >
+                  Set next stop
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setViewMode('FUEL');
+                    setSortMode('DISTANCE');
+                    setShowList(true);
+                    setShowMap(false);
+                    setIsFilterExpanded(false);
+                    window.setTimeout(() => {
+                      document.getElementById('list-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 120);
+                  }}
+                  className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-700"
+                >
+                  Find fuel in range
+                </button>
               </div>
             </>
           ) : null}
@@ -473,7 +570,9 @@ function HomePageContent() {
       ) : null}
 
       {showList ? (
-        <BottomSheet nearest={nearestTop10} nextRnR={nextByDirection.rnr} nextFuel={nextByDirection.fuel} selected={selectedPlace} onSelect={setSelectedPlace} rangeKm={rangeKm} sortMode={sortMode} onSortModeChange={setSortMode} loading={locationLoading} />
+        <section id="list-section">
+          <BottomSheet nearest={nearestTop10} nextRnR={nextByDirection.rnr} nextFuel={nextByDirection.fuel} selected={selectedPlace} onSelect={handleSelectPlace} rangeKm={rangeKm} sortMode={sortMode} onSortModeChange={setSortMode} loading={locationLoading} />
+        </section>
       ) : (
         <section className="border-t border-slate-200/70 bg-white/80 px-4 py-6 text-center text-sm text-slate-600">List is hidden. Switch to "List" or "Map + List" to view stop suggestions.</section>
       )}

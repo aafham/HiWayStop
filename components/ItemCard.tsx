@@ -8,6 +8,7 @@ type ItemCardProps = {
   item: PlaceItem;
   onSelect: (item: PlaceItem) => void;
   disabled: boolean;
+  selected?: boolean;
 };
 
 function urgencyClass(eta: number): string {
@@ -16,12 +17,12 @@ function urgencyClass(eta: number): string {
   return 'bg-slate-100 text-slate-700';
 }
 
-export default function ItemCard({ item, onSelect, disabled }: ItemCardProps) {
+export default function ItemCard({ item, onSelect, disabled, selected = false }: ItemCardProps) {
   const onRouteLabel = item.onRouteConfidence === 'RNR_LINKED' ? 'R&R-linked' : item.onRouteConfidence === 'CORRIDOR_VERIFIED' ? 'On Corridor' : 'R&R Site';
   const eta = item.etaMinutes ?? 0;
 
   return (
-    <div className={`ui-rise w-full rounded-2xl border p-3 text-left transition ${disabled ? 'cursor-not-allowed border-slate-200 bg-slate-100/90 opacity-70' : 'border-slate-200/80 bg-white/95 hover:border-brand-300 hover:shadow-[0_10px_22px_rgba(15,23,42,0.08)]'}`}>
+    <div id={`item-${item.id}`} className={`ui-rise w-full rounded-2xl border p-3 text-left transition ${disabled ? 'cursor-not-allowed border-slate-200 bg-slate-100/90 opacity-70' : selected ? 'border-brand-400 bg-brand-50/30 shadow-[0_10px_24px_rgba(21,149,112,0.14)]' : 'border-slate-200/80 bg-white/95 hover:border-brand-300 hover:shadow-[0_10px_22px_rgba(15,23,42,0.08)]'}`}>
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="font-semibold text-slate-900">{item.name}</p>
