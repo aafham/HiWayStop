@@ -63,7 +63,11 @@ export default function HighwayMap({ userLoc, highways, places, onSelect, rangeK
           <>
             <Circle center={[userLoc.lat, userLoc.lng]} radius={250} pathOptions={{ color: '#0f6d53', fillColor: '#0f6d53', fillOpacity: 0.12, weight: 1 }} />
             {rangeKm !== null && rangeKm > 0 ? <Circle center={[userLoc.lat, userLoc.lng]} radius={rangeKm * 1000} pathOptions={{ color: '#0ea5e9', fillColor: '#0ea5e9', fillOpacity: 0.06, weight: 2, dashArray: '6 5' }} /> : null}
-            <Marker position={[userLoc.lat, userLoc.lng]} icon={userIcon}><Popup>Your current location</Popup></Marker>
+            <Marker position={[userLoc.lat, userLoc.lng]} icon={userIcon}>
+              <Popup keepInView autoPan autoPanPadding={[40, 40]}>
+                Your current location
+              </Popup>
+            </Marker>
           </>
         ) : null}
 
@@ -71,7 +75,7 @@ export default function HighwayMap({ userLoc, highways, places, onSelect, rangeK
           const inRange = !userLoc || !rangeKm || rangeKm <= 0 || haversineKm(userLoc, { lat: place.lat, lng: place.lng }) <= rangeKm;
           return (
             <Marker key={place.id} position={[place.lat, place.lng]} icon={placeIcon(place.kind, inRange)} eventHandlers={{ click: () => onSelect(place) }}>
-              <Popup>
+              <Popup keepInView autoPan autoPanPadding={[40, 40]}>
                 <div className="text-xs">
                   <p className="font-semibold">{place.name}</p>
                   <p>{place.highwayId}</p>
@@ -84,12 +88,12 @@ export default function HighwayMap({ userLoc, highways, places, onSelect, rangeK
       </MapContainer>
 
       {!hasPlaces ? (
-        <div className="absolute left-1/2 top-3 z-[500] w-[88%] max-w-sm -translate-x-1/2 rounded-xl border border-slate-200/90 bg-white/95 px-3 py-2 text-xs text-slate-700 shadow-lg">
+        <div className="pointer-events-none absolute left-1/2 top-3 z-[1000] w-[88%] max-w-sm -translate-x-1/2 rounded-xl border border-slate-200/90 bg-white/95 px-3 py-2 text-xs text-slate-700 shadow-lg">
           No map pins for current filters. Try increasing corridor buffer or reset filters.
         </div>
       ) : null}
 
-      <div className="absolute bottom-3 left-3 rounded-xl border border-slate-200/80 bg-white/95 px-2.5 py-2 text-[10px] font-semibold text-slate-700 shadow-lg backdrop-blur">
+      <div className="pointer-events-none absolute bottom-3 left-3 z-[1000] rounded-xl border border-slate-200/80 bg-white/95 px-2.5 py-2 text-[10px] font-semibold text-slate-700 shadow-lg backdrop-blur">
         <p className="mb-1 text-[10px] uppercase tracking-wide text-slate-500">Legend</p>
         <div className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-full bg-[#159570]" />R&R</div>
         <div className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-full bg-[#0ea5e9]" />Fuel</div>
