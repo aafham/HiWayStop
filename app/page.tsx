@@ -269,6 +269,25 @@ function HomePageContent() {
   const summarizeSelected = (items: string[], limit = 3): string => items.length <= limit ? items.join(', ') : `${items.slice(0, limit).join(', ')} +${items.length - limit} more`;
   const activeFiltersCount = (destination.trim() ? 1 : 0) + (viewMode !== 'ALL' ? 1 : 0) + (selectedBrands.length > 0 ? 1 : 0) + (activeFacilities.length > 0 ? 1 : 0) + (bufferMeters !== 400 ? 1 : 0) + (rangeKm !== null ? 1 : 0);
   const isHighwayUncertain = Boolean(userLoc && !currentHighway && !locationLoading && !locationError);
+  const highwayLine = useMemo(() => {
+    if (locationLoading) return 'Highway: Detecting...';
+    if (locationError) return `Highway: Location error`;
+    if (!userLoc) return 'Highway: Not selected yet';
+    if (currentHighway) return `Highway: ${currentHighway.code}`;
+    const near = highways.find((h) => h.id === closestHighway.nearestHighwayId);
+    if (near && Number.isFinite(closestHighway.distanceMeters)) return `Highway: Uncertain (~${(closestHighway.distanceMeters / 1000).toFixed(1)} km from ${near.code})`;
+    return 'Highway: Uncertain';
+  }, [closestHighway.distanceMeters, closestHighway.nearestHighwayId, currentHighway, locationError, locationLoading, userLoc]);
+  const routeConfidenceText = useMemo(() => {
+    if (!userLoc || locationLoading) return 'Confidence: Waiting for location';
+    if (locationError) return 'Confidence: Location unavailable';
+    if (currentHighway) return 'Confidence: High (inside corridor)';
+    if (Number.isFinite(closestHighway.distanceMeters)) {
+      if (closestHighway.distanceMeters <= 1500) return 'Confidence: Low (outside corridor)';
+      return 'Confidence: Very low (far from corridor)';
+    }
+    return 'Confidence: Unknown';
+  }, [closestHighway.distanceMeters, currentHighway, locationError, locationLoading, userLoc]);
   const activeFilterTags = [
     viewMode !== 'ALL' ? `Mode: ${viewMode}` : null,
     selectedBrands.length > 0 ? `Brands: ${summarizeSelected(selectedBrands, 2)}` : null,
@@ -384,12 +403,16 @@ function HomePageContent() {
 
   return (
     <main className="mx-auto min-h-screen max-w-5xl overflow-hidden bg-white/70 shadow-[0_18px_60px_rgba(15,23,42,0.12)] ring-1 ring-slate-200/80 backdrop-blur">
-      <TopBar locationStatus={locationStatus} isHighwayUncertain={isHighwayUncertain} onUseLocation={useCurrentLocation} loading={locationLoading} showStatus={false} />
+      <TopBar locationStatus={locationStatus} isHighwayUncertain={isHighwayUncertain} onUseLocation={useCurrentLocation} loading={locationLoading} hasLocation={Boolean(userLoc)} showStatus={false} />
 
       <section className="border-b border-slate-200/70 bg-slate-50/70 px-4 py-2.5">
         <div className={`rounded-xl border px-3 py-2 text-xs ${isHighwayUncertain ? 'border-amber-200 bg-amber-50/90 text-amber-900' : 'border-slate-200 bg-white text-slate-700'}`}>
-          <p className="font-semibold">{locationStatus}</p>
-          <p className="mt-1 inline-flex items-center gap-1 font-semibold"><ShieldAlert className="h-3.5 w-3.5" />For safety, do not use this app while driving. Use it only when stopped.</p>
+          <div className="flex items-center justify-between gap-2">
+            <p className="font-semibold">{highwayLine}</p>
+            <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${isHighwayUncertain ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-700'}`}>{isHighwayUncertain ? 'Uncertain' : 'Confirmed'}</span>
+          </div>
+          <p className="mt-1 text-[11px] text-slate-600">{routeConfidenceText}</p>
+          <p className="mt-1 inline-flex items-center gap-1 text-[11px] text-amber-900"><ShieldAlert className="h-3.5 w-3.5" />For safety, do not use this app while driving. Use it only when stopped.</p>
         </div>
       </section>
 
