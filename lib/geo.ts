@@ -175,26 +175,35 @@ export function getNextAlongHighway<T extends { lat: number; lng: number }>(
   limit: number,
 ): Array<T & { distanceKm: number }> {
   const userProgress = distanceFromPolylineStart(userLoc, highwayPolyline);
+  type RankedItem = {
+    item: T;
+    itemProgress: number;
+    distanceAlong: number;
+    distanceKm: number;
+  };
 
-  const ranked = items
-    .map((item) => {
+  const ranked: RankedItem[] = items
+    .map((item): RankedItem => {
       const itemProgress = distanceFromPolylineStart({ lat: item.lat, lng: item.lng }, highwayPolyline);
       const distanceAlong = itemProgress - userProgress;
       return {
-        ...item,
-        _itemProgress: itemProgress,
-        _distanceAlong: distanceAlong,
+        item,
+        itemProgress,
+        distanceAlong,
         distanceKm: haversineKm(userLoc, { lat: item.lat, lng: item.lng }),
       };
     })
     .filter((item) => {
       const forward = direction === 'NORTH' || direction === 'EAST';
-      return forward ? item._distanceAlong > 0 : item._distanceAlong < 0;
+      return forward ? item.distanceAlong > 0 : item.distanceAlong < 0;
     })
-    .sort((a, b) => Math.abs(a._distanceAlong) - Math.abs(b._distanceAlong))
+    .sort((a, b) => Math.abs(a.distanceAlong) - Math.abs(b.distanceAlong))
     .slice(0, limit);
 
-  return ranked.map(({ _itemProgress, _distanceAlong, ...clean }) => clean);
+  return ranked.map((rankedItem) => ({
+    ...rankedItem.item,
+    distanceKm: rankedItem.distanceKm,
+  }));
 }
 
 export function detectClosestHighway(userLoc: LatLng, highways: Highway[]): {
