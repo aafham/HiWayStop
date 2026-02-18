@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { AlertTriangle, Compass, LocateFixed, MapPinOff, ShieldAlert } from 'lucide-react';
@@ -70,7 +70,7 @@ function nearestCandidates(userLoc: LatLng, items: PlaceItem[], grid = buildSpat
   return items;
 }
 
-export default function HomePage() {
+function HomePageContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -538,5 +538,13 @@ export default function HomePage() {
         </p>
       </section>
     </main>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<div className="h-[45vh] animate-pulse bg-slate-100" />}>
+      <HomePageContent />
+    </Suspense>
   );
 }
