@@ -147,6 +147,28 @@ export default function HomePage() {
     }));
   }, [places, userLoc]);
 
+  const nearestRnr = useMemo(() => {
+    if (!userLoc) return null;
+    const nearest = getNearestItems(
+      userLoc,
+      rnrs.map(rnrToPlace),
+      1,
+    )[0];
+    if (!nearest) return null;
+    return { ...nearest, etaMinutes: getETA(nearest.distanceKm) };
+  }, [userLoc]);
+
+  const nearestFuel = useMemo(() => {
+    if (!userLoc) return null;
+    const nearest = getNearestItems(
+      userLoc,
+      highwayOnlyStations.map(stationToPlace),
+      1,
+    )[0];
+    if (!nearest) return null;
+    return { ...nearest, etaMinutes: getETA(nearest.distanceKm) };
+  }, [highwayOnlyStations, userLoc]);
+
   const nextByDirection = useMemo(() => {
     if (!userLoc || !currentHighway || !direction) {
       return { rnr: [] as PlaceItem[], fuel: [] as PlaceItem[] };
@@ -198,6 +220,36 @@ export default function HomePage() {
   return (
     <main className="mx-auto min-h-screen max-w-5xl bg-white shadow-sm">
       <TopBar locationStatus={locationStatus} onUseLocation={useCurrentLocation} loading={locationLoading} />
+
+      <section className="grid gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3 sm:grid-cols-2">
+        <div className="rounded-xl border border-slate-200 bg-white p-3">
+          <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">R&R terdekat</p>
+          {nearestRnr ? (
+            <>
+              <p className="mt-1 text-sm font-semibold text-slate-900">{nearestRnr.name}</p>
+              <p className="text-xs text-slate-600">
+                {nearestRnr.distanceKm.toFixed(1)} km • ETA {nearestRnr.etaMinutes} min
+              </p>
+            </>
+          ) : (
+            <p className="mt-1 text-xs text-slate-500">Aktifkan lokasi untuk lihat R&R terdekat.</p>
+          )}
+        </div>
+        <div className="rounded-xl border border-slate-200 bg-white p-3">
+          <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Stesen minyak terdekat</p>
+          {nearestFuel ? (
+            <>
+              <p className="mt-1 text-sm font-semibold text-slate-900">{nearestFuel.name}</p>
+              <p className="text-xs text-slate-600">
+                {nearestFuel.distanceKm.toFixed(1)} km • ETA {nearestFuel.etaMinutes} min
+                {nearestFuel.brand ? ` • ${nearestFuel.brand}` : ''}
+              </p>
+            </>
+          ) : (
+            <p className="mt-1 text-xs text-slate-500">Aktifkan lokasi untuk lihat stesen terdekat.</p>
+          )}
+        </div>
+      </section>
 
       <FilterPanel
         viewMode={viewMode}
