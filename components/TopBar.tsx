@@ -7,9 +7,10 @@ type TopBarProps = {
   isHighwayUncertain: boolean;
   onUseLocation: () => void;
   loading: boolean;
+  showStatus?: boolean;
 };
 
-export default function TopBar({ locationStatus, isHighwayUncertain, onUseLocation, loading }: TopBarProps) {
+export default function TopBar({ locationStatus, isHighwayUncertain, onUseLocation, loading, showStatus = true }: TopBarProps) {
   const locationClass = isHighwayUncertain
     ? 'border-amber-300 bg-amber-50 text-amber-900'
     : 'border-slate-200 bg-white text-slate-600';
@@ -22,9 +23,9 @@ export default function TopBar({ locationStatus, isHighwayUncertain, onUseLocati
           <p className="text-xs font-medium text-slate-500">Find R&R and fuel stops exclusively on highways.</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className={`hidden rounded-full border px-3 py-1 text-xs shadow-sm sm:inline ${locationClass}`}>
+          {showStatus ? <span className={`hidden rounded-full border px-3 py-1 text-xs shadow-sm sm:inline ${locationClass}`}>
             {locationStatus}
-          </span>
+          </span> : null}
           <button
             type="button"
             onClick={onUseLocation}
@@ -36,7 +37,7 @@ export default function TopBar({ locationStatus, isHighwayUncertain, onUseLocati
           </button>
         </div>
       </div>
-      <div className={`border-t px-4 py-2 text-xs sm:hidden ${isHighwayUncertain ? 'border-amber-200 bg-amber-50 text-amber-900' : 'border-slate-100/80 bg-white/70 text-slate-600'}`}>{locationStatus}</div>
+      {showStatus ? <div className={`border-t px-4 py-2 text-xs sm:hidden ${isHighwayUncertain ? 'border-amber-200 bg-amber-50 text-amber-900' : 'border-slate-100/80 bg-white/70 text-slate-600'}`}>{locationStatus}</div> : null}
     </header>
   );
 }

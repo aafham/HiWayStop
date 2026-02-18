@@ -317,7 +317,7 @@ function HomePageContent() {
 
   return (
     <main className="mx-auto min-h-screen max-w-5xl overflow-hidden bg-white/70 shadow-[0_18px_60px_rgba(15,23,42,0.12)] ring-1 ring-slate-200/80 backdrop-blur">
-      <TopBar locationStatus={locationStatus} isHighwayUncertain={isHighwayUncertain} onUseLocation={useCurrentLocation} loading={locationLoading} />
+      <TopBar locationStatus={locationStatus} isHighwayUncertain={isHighwayUncertain} onUseLocation={useCurrentLocation} loading={locationLoading} showStatus={false} />
 
       <section className="border-b border-slate-200/70 bg-slate-50/70 px-4 py-2.5">
         <div className={`rounded-xl border px-3 py-2 text-xs ${isHighwayUncertain ? 'border-amber-200 bg-amber-50/90 text-amber-900' : 'border-slate-200 bg-white text-slate-700'}`}>
