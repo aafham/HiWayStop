@@ -3,63 +3,93 @@
 Tagline: **Cari R&R & minyak-khusus di lebuh raya.**
 
 HiWayStop ialah web app highway-only untuk pengguna lebuh raya Malaysia.
-Aplikasi ini hanya memaparkan R&R dan stesen minyak yang patuh peraturan corridor lebuh raya.
+Aplikasi ini fokus kepada R&R dan stesen minyak sepanjang lebuh raya sahaja, dengan logik corridor untuk tapis station luar highway.
 
-## Tech Stack
+## Ringkasan
 
-- Next.js App Router + TypeScript
-- Tailwind CSS
-- Leaflet (OpenStreetMap tiles)
-- Browser Geolocation API
-- Local JSON dataset (`/data`) tanpa DB
+- Platform: Next.js App Router + TypeScript
+- UI: Tailwind CSS (mobile-first)
+- Peta: Leaflet + OpenStreetMap
+- Lokasi: Browser Geolocation API
+- Data: Local JSON (`/data`) + optional generated full dataset (`/data/generated`)
 
-## Ciri MVP
+## Ciri Utama Website
 
-1. Home
+### 1) Home & Lokasi
 - Butang `Guna lokasi saya`
-- Kad pantas bawah header:
+- Status lokasi + highway semasa (closest polyline)
+- Banner keselamatan: jangan guna app semasa memandu
+- Kad cepat:
   - `R&R terdekat`
-  - `Stesen minyak terdekat` (highway-only)
-- Toggle `Semua / R&R / Minyak`
-- Medan `Destinasi (optional)` (placeholder routing)
-- Papar highway semasa berdasarkan polyline terdekat, atau `Tidak pasti`
+  - `Stesen minyak terdekat`
 
-2. Map + List
-- Peta pin untuk R&R dan stesen minyak highway-only
-- Marker lokasi semasa yang jelas + bulatan radius sekitar lokasi
-- Auto recenter map ke current location selepas geolocation berjaya
-- Bottom sheet list boleh scroll
-- Tap card/pin: nama, highway, arah, jarak, ETA, kemudahan, brand
+### 2) Penapis (Filter UX)
+- Toggle view: `Semua`, `R&R`, `Minyak`
+- `Destinasi (optional)` + quick suggestion
+- Brand minyak multi-select
+- Kemudahan R&R multi-select (`surau`, `toilet`, `foodcourt`, `ev`)
+- Slider corridor `200m - 800m`
+- Fuel range mode + preset quick range chips
+- Quick preset:
+  - `Wajib Minyak`
+  - `Family Stop`
+  - `EV Sahaja`
+- Reset filter 1-tap
+- Sticky mini summary filter aktif
+- Compact filter mode on scroll (boleh expand/collapse)
 
-3. Nearest & Next
+### 3) Map + List Experience
+- Toggle paparan: `Map`, `List`, `Map + List`
+- Marker lokasi semasa jelas + recenter automatik
+- Range ring atas map bila range diisi
+- Marker `off-range` dikelabukan
+- Map legend (R&R / Minyak / Lokasi / Off-range)
+- Bottom sheet list scrollable + skeleton loading
+
+### 4) Nearest, Next, Priority
 - `Terdekat dari anda` (Top 10)
-- `Seterusnya ikut arah` (3 R&R + 3 stesen minyak)
-- Arah dari:
-  - heading geolocation/device jika ada
-  - bearing lokasi lama -> lokasi semasa
-  - fallback pilihan manual `NORTH/SOUTH/EAST/WEST`
+- `Seterusnya ikut arah` (R&R + Minyak)
+- Priority card: `Seterusnya dalam laluan`
+- Trip panel:
+  - Next stop km
+  - ETA next
+  - Fuel dalam range
+  - Cadangan rehat
 
-4. Highway-only Rule
-- Stesen minyak dipaparkan hanya jika:
-  - dalam corridor buffer highway (default 400m), atau
-  - `type = "RNR_STATION"`
-- Stesen luar corridor disisihkan automatik
+### 5) Sorting & Decision Support
+- Sort list terdekat:
+  - `Paling dekat`
+  - `ETA terpantas`
+  - `A-Z`
+- ETA urgency color:
+  - hijau (<10 min)
+  - kuning (10-20 min)
+  - kelabu (>20 min)
 
-5. Filters
-- Multi-select brand minyak
-- Filter kemudahan R&R (`surau`, `toilet`, `foodcourt`, `ev`)
-- Slider corridor buffer `200m - 800m`
-- UI penapis versi kemas:
-  - segmented mode button
-  - chip counter (jumlah pilihan)
-  - input dengan ikon dan hierarchy visual mobile-first
+### 6) On-Route Confidence + Navigation
+- Badge confidence:
+  - `R&R Site`
+  - `R&R-linked`
+  - `On Corridor`
+- Butang `Navigasi` (Google Maps directions URL)
 
-6. Fuel Range Mode (bonus)
-- Input range km
-- Item luar range digraykan/disabled
-- Warning jika tiada stesen minyak dalam range
+### 7) Empty State Pintar
+- Empty state ikut konteks filter aktif
+- Suggestion tindakan cepat:
+  - reset brand
+  - reset kemudahan
+  - naikkan buffer
+  - kosongkan destinasi
 
-## Struktur Folder
+## Highway-only Rule (Core)
+
+Stesen minyak dipaparkan hanya jika:
+1. berada dalam `highway corridor buffer`, atau
+2. `type = "RNR_STATION"`.
+
+Station luar corridor akan ditapis keluar walaupun jarak dekat.
+
+## Struktur Projek
 
 ```text
 app/
@@ -77,6 +107,8 @@ scripts/
 lib/
   data.ts
   geo.ts
+  navigation.ts
+  spatial.ts
   transform.ts
 data/
   highways.json
@@ -93,123 +125,113 @@ types/
 ## Data Model
 
 ### `data/highways.json`
-- `id`, `name`, `code`
-- `polyline: [{lat, lng}, ...]`
-- Sample tersedia: `PLUS (E1)`, `LPT1 (E8)`
+- `id`, `name`, `code`, `polyline[]`
 
 ### `data/rnr.json`
 - `id`, `name`, `highwayId`, `direction`, `lat`, `lng`
-- `facilities: { surau, toilet, foodcourt, ev }`
-- `hasFuel`, `fuelBrands[]`
-- Sample: 8 R&R
+- `facilities`, `hasFuel`, `fuelBrands[]`
 
 ### `data/stations.json`
-- `id`, `name`, `brand`
-- `type: "RNR_STATION" | "HIGHWAY_STATION"`
+- `id`, `name`, `brand`, `type`
 - `highwayId`, `direction`, `lat`, `lng`, `rnrId`
-- Sample: 10 stesen (termasuk beberapa sengaja luar corridor untuk test)
 
-## Fungsi Utama (lib/geo.ts)
+## Fungsi / Modul Penting
 
-- `haversineKm(a, b)`
-  - Jarak geodesic dalam km
+### `lib/geo.ts`
+- `haversineKm`
+- `distanceToSegmentMeters`
+- `isWithinHighwayCorridor`
+- `filterHighwayOnlyStations`
+- `getNearestItems`
+- `getETA`
+- `getNextAlongHighway`
+- `detectClosestHighway`
 
-- `distanceToSegmentMeters(point, start, end)`
-  - Jarak point -> segmen polyline (meter)
+### `lib/spatial.ts`
+- Grid spatial index ringkas untuk percepat nearest query bila dataset besar.
 
-- `isWithinHighwayCorridor(point, highwayPolylines, bufferMeters)`
-  - Semak point berada dalam buffer corridor
+### `lib/navigation.ts`
+- Bina URL navigation terus ke destinasi.
 
-- `filterHighwayOnlyStations(stations, highways, bufferMeters)`
-  - Terapkan peraturan highway-only:
-    - lulus jika `RNR_STATION`
-    - atau lulus corridor check untuk `HIGHWAY_STATION`
+### `lib/data.ts`
+- Auto fallback:
+  - guna `data/generated/*.full.json` jika ada data
+  - fallback ke sample `data/*.json` jika tiada
 
-- `getNearestItems(userLoc, items, limit)`
-  - Susun item mengikut jarak terdekat
-
-- `getETA(distanceKm, speedKmh=100)`
-  - Anggaran ETA ringkas (minit)
-
-- `getNextAlongHighway(userLoc, highwayPolyline, direction, items, limit)`
-  - Cari item seterusnya mengikut progress sepanjang polyline + arah
-
-- `detectClosestHighway(userLoc, highways)`
-  - Tentukan highway semasa berdasarkan segmen terdekat
-
-- `runGeoSelfCheck()`
-  - Self-check ringkas semasa app load
-
-## Cara Run
+## Cara Run (Local)
 
 1. Install dependency:
 ```bash
 npm install
 ```
 
-2. Jalankan development server:
+2. Jalankan dev server:
 ```bash
 npm run dev
 ```
 
-3. Buka browser:
+3. Buka:
 ```text
 http://localhost:3000
 ```
 
-## Data Malaysia Penuh (Highway + R&R + Stesen Minyak)
-
-Untuk masukkan data seluruh Malaysia secara automatik ke fail local JSON:
+## Generate Data Malaysia Penuh
 
 ```bash
 npm run data:import:my
 ```
 
-Script ini akan jana:
+Script akan jana:
 - `data/generated/highways.full.json`
 - `data/generated/rnr.full.json`
 - `data/generated/stations.full.json`
 
-App akan **auto guna fail generated** jika tidak kosong. Jika kosong, app fallback ke sample dalam `data/*.json`.
+## Deploy Vercel
 
-Nota:
-- Sumber automatik datang dari OpenStreetMap (Overpass).
-- Untuk production, buat semakan manual kerana mapping `direction/highwayId/type` mungkin perlukan normalisasi tambahan bergantung tagging OSM.
+1. Push repo ke GitHub
+2. Import project di Vercel (`Next.js`, root `./`)
+3. Remove dummy env vars (jika ada)
+4. Deploy
+5. Update seterusnya: `git push` -> auto redeploy
 
-## Cara Guna
+## Troubleshooting Ringkas
 
-1. Tekan `Guna lokasi saya` dan benarkan permission.
-2. Lihat kad ringkas bawah header untuk `R&R terdekat` dan `Stesen minyak terdekat`.
-3. Pilih mode `Semua`, `R&R`, atau `Minyak`.
-4. Ubah filter brand, kemudahan, dan corridor buffer.
-5. Semak seksyen:
-- `Terdekat dari anda`
-- `Seterusnya ikut arah`
-6. Jika arah tidak dikesan, pilih arah manual.
-7. Masukkan `Fuel Range Mode` untuk semak capaian range.
+- Error JSON `Unexpected token '﻿'`
+  - Punca: UTF-8 BOM
+  - Fix: simpan fail sebagai UTF-8 without BOM
 
-## Deploy Vercel (Ringkas)
+- Error `useSearchParams should be wrapped in suspense`
+  - Sudah ditangani: page client dibalut dengan `Suspense`
 
-1. Push repo ke GitHub.
-2. Import project di Vercel (preset `Next.js`, root `./`).
-3. Pastikan tiada dummy env var diperlukan.
-4. Deploy.
-5. Untuk update seterusnya, `git push` sahaja (auto redeploy).
+## Update Log
 
-Nota:
-- Simpan fail sebagai `UTF-8 without BOM` untuk elak build error JSON/TS di Vercel.
+### 2026-02-18 (v0.1.0 -> v0.3.0)
+- Bina app penuh dari kosong (Next.js + TS + Tailwind + Leaflet)
+- Tambah dataset sample highways/R&R/stations
+- Implement highway-only corridor filtering
+- Implement nearest + next-by-direction
+- Tambah Fuel Range mode
+- Tambah quick cards nearest bawah header
+- Fix encoding issue (UTF-8 without BOM) untuk Vercel
+- Fix type issue `getNextAlongHighway`
+- Fix `useSearchParams` dengan `Suspense`
+- Tambah import script data Malaysia dari OSM (generated JSON)
+- Polish UI/UX besar:
+  - quick preset
+  - reset filter
+  - sticky summary
+  - map/list toggle
+  - compact filter on scroll
+  - map legend + range ring
+  - urgency ETA colors
+  - priority next stop card
+  - trip summary panel
+  - contextual empty state
+  - on-route confidence badges
+  - navigate button per card
 
-## Migrasi Ke DB (bila perlu)
-
-Reka bentuk sekarang memudahkan migrasi:
-- Kekalkan `types/index.ts` sebagai kontrak schema
-- Ganti `lib/data.ts` (import JSON) kepada data access layer DB/API
-- Reuse semua util geospatial di `lib/geo.ts`
-- UI (`components/*`) tidak perlu perubahan besar
-
-## Nota Penting
+## Nota
 
 - Tiada API berbayar digunakan.
-- Tiada data station luar highway dipaparkan jika gagal highway-only rule.
-- Destinasi masih placeholder untuk fasa routing seterusnya.
-
+- Semua data daripada local JSON.
+- Untuk production dengan data besar, disyorkan semakan manual dataset OSM (direction/tag consistency).
