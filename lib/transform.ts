@@ -11,6 +11,7 @@ export function rnrToPlace(rnr: Rnr): PlaceItem {
     kind: 'RNR',
     facilities: rnr.facilities,
     fuelBrands: rnr.fuelBrands,
+    onRouteConfidence: 'RNR_SITE',
     sourceId: rnr.id,
   };
 }
@@ -25,6 +26,7 @@ export function stationToPlace(station: Station): PlaceItem {
     lng: station.lng,
     kind: 'FUEL',
     brand: station.brand,
+    onRouteConfidence: station.type === 'RNR_STATION' ? 'RNR_LINKED' : 'CORRIDOR_VERIFIED',
     sourceId: station.id,
   };
 }

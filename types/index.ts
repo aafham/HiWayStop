@@ -48,6 +48,8 @@ export type Station = {
 export type ViewMode = 'ALL' | 'RNR' | 'FUEL';
 
 export type PlaceKind = 'RNR' | 'FUEL';
+export type SortMode = 'DISTANCE' | 'ETA' | 'ALPHA';
+export type OnRouteConfidence = 'RNR_SITE' | 'RNR_LINKED' | 'CORRIDOR_VERIFIED';
 
 export type PlaceItem = {
   id: string;
@@ -62,6 +64,7 @@ export type PlaceItem = {
   facilities?: FacilityFlags;
   fuelBrands?: string[];
   brand?: string;
+  onRouteConfidence?: OnRouteConfidence;
   sourceId: string;
 };
 
