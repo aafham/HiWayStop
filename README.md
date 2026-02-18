@@ -2,50 +2,60 @@
 
 Tagline: **Find R&R and fuel stops exclusively on Malaysian highways.**
 
-HiWayStop is a highway-only web app for highway users in Malaysia.
-It focuses on R&R areas and fuel stations along highways only, with a corridor-based filter that removes off-highway stations.
+HiWayStop is a highway-only web app built for Malaysian highway users.
+It shows only highway-relevant R&R areas and fuel stations using corridor-based filtering.
 
-## Overview
+## Stack
 
-- Framework: Next.js App Router + TypeScript
-- UI: Tailwind CSS (mobile-first)
-- Map: Leaflet + OpenStreetMap
-- Location: Browser Geolocation API
-- Data: Local JSON (`/data`) + optional generated full dataset (`/data/generated`)
+- Next.js (App Router) + TypeScript
+- Tailwind CSS
+- Leaflet + OpenStreetMap
+- Browser Geolocation API
+- Local JSON data (no DB yet)
 
-## Core Features
+## What The App Does
 
-### 1) Home & Location
-- `Use my location` button
-- Current location status + current highway (closest polyline)
-- Safety banner
+1. Detects your current location and nearest highway
+2. Shows nearest highway-only stops (R&R + fuel)
+3. Filters fuel stations by corridor and R&R-linked station type
+4. Supports range-based visibility (reachable vs out-of-range)
+5. Provides next stops along travel direction
+6. Offers direct navigation links for each stop
+
+## Main Features
+
+### Home & Location
+- `Use my location`
+- Current highway status (or nearest corridor estimate if uncertain)
+- Safety notice
 - Quick cards:
-  - `Nearest R&R`
-  - `Nearest Fuel Station`
+  - Nearest R&R
+  - Nearest Fuel Station
 
-### 2) Filters
-- View toggle: `All`, `R&R`, `Fuel`
-- Optional destination input + quick suggestions
-- Fuel brand multi-select
-- R&R facility multi-select (`surau`, `toilet`, `foodcourt`, `ev`)
-- Corridor slider `200m - 800m`
-- Fuel range mode + quick range chips
-- Quick presets (`Fuel First`, `Family Stop`, `EV Only`)
-- 1-tap reset, select all, clear all
-- Sticky active-filter summary
+### Filter Experience
+- View mode: `All`, `R&R`, `Fuel`
+- Destination input (context only for now)
+- Fuel brand filters (multi-select)
+- R&R facilities filters (multi-select)
+- Corridor slider (`200m - 800m`)
+- Fuel range input + quick presets
+- Quick presets: `Fuel First`, `Family Stop`, `EV Only`
+- `Select all`, `Clear all`, `Reset`
 - Compact filter mode on scroll
+- Sticky active-filter summary
 
-### 3) Map + List UX
+### Map + List UX
 - View mode switch: `Map`, `List`, `Map + List`
-- Clear current-location marker + auto recenter
-- Range ring shown on map when fuel range is set
+- Current-location marker + auto recenter
+- Range ring on map when range is set
 - Off-range markers dimmed
-- Built-in map legend
-- Scrollable bottom sheet list + loading skeletons
+- Built-in legend
+- Bottom sheet list with skeleton loading
+- Floating “View map” shortcut when deep in list
 
-### 4) Nearest / Next / Priority
-- `Nearest to you (Top 10)`
-- `Next along direction` for both R&R and fuel
+### Nearest, Next, Trip
+- Nearest Top 10
+- Next along direction for R&R + fuel
 - Priority card: `Next Stop On Route`
 - Trip panel:
   - next stop distance
@@ -53,31 +63,34 @@ It focuses on R&R areas and fuel stations along highways only, with a corridor-b
   - fuel in range
   - rest suggestion
 
-### 5) Decision Aids
-- Sort list by:
-  - nearest distance
-  - fastest ETA
+### Decision Aids
+- Sort by:
+  - Distance
+  - ETA
   - A-Z
-  - route confidence
-- ETA urgency colors (green/yellow/gray)
-- Route confidence badges (`R&R Site`, `R&R-linked`, `On Corridor`)
-- Direct `Navigate` action from cards/detail
+  - Route confidence
+- ETA urgency colors
+- Route confidence badges:
+  - `R&R Site`
+  - `R&R-linked`
+  - `On Corridor`
+- Sticky selected-stop action bar with `Navigate`
 
-### 6) Smart Empty State
-- Context-aware empty reason
+### Smart Empty State
+- Context-aware “no result” reason
 - One-tap fixes:
   - reset brands
   - reset facilities
   - increase buffer
   - clear destination
 
-## Highway-only Rule (Core Logic)
+## Highway-only Rule
 
 Fuel stations are shown only if:
-1. they are within the highway corridor buffer, or
-2. `type = "RNR_STATION"`.
+1. They are inside the highway corridor buffer, or
+2. `type = "RNR_STATION"`
 
-Stations outside the corridor are excluded even if they are physically near.
+Any station outside corridor is excluded, even if nearby.
 
 ## Project Structure
 
@@ -112,19 +125,6 @@ types/
   index.ts
 ```
 
-## Data Model
-
-### `data/highways.json`
-- `id`, `name`, `code`, `polyline[]`
-
-### `data/rnr.json`
-- `id`, `name`, `highwayId`, `direction`, `lat`, `lng`
-- `facilities`, `hasFuel`, `fuelBrands[]`
-
-### `data/stations.json`
-- `id`, `name`, `brand`, `type`
-- `highwayId`, `direction`, `lat`, `lng`, `rnrId`
-
 ## Key Modules
 
 ### `lib/geo.ts`
@@ -138,32 +138,22 @@ types/
 - `detectClosestHighway`
 
 ### `lib/spatial.ts`
-- Lightweight spatial grid indexing for faster nearest queries on large datasets.
+- Lightweight spatial indexing for faster nearest lookups on larger datasets.
 
 ### `lib/navigation.ts`
-- Generates external driving navigation links.
+- Generates external driving navigation URLs.
 
 ### `lib/data.ts`
-- Automatic fallback strategy:
-  - use `data/generated/*.full.json` if populated
-  - fallback to sample `data/*.json` if not
+- Uses generated full datasets when available, otherwise falls back to sample JSON.
 
 ## Run Locally
 
-1. Install dependencies:
 ```bash
 npm install
-```
-
-2. Start dev server:
-```bash
 npm run dev
 ```
 
-3. Open:
-```text
-http://localhost:3000
-```
+Open: `http://localhost:3000`
 
 ## Generate Full Malaysia Dataset
 
@@ -171,30 +161,47 @@ http://localhost:3000
 npm run data:import:my
 ```
 
-Generated files:
+Outputs:
 - `data/generated/highways.full.json`
 - `data/generated/rnr.full.json`
 - `data/generated/stations.full.json`
 
-## Deploy on Vercel
+## Deploy (Vercel)
 
 1. Push repo to GitHub
 2. Import project in Vercel (`Next.js`, root `./`)
-3. Remove any dummy env vars (if present)
+3. Remove dummy env vars if any
 4. Deploy
-5. Future updates: `git push` triggers auto redeploy
+5. Later updates: `git push` for auto redeploy
 
-## Quick Troubleshooting
+## Troubleshooting
 
-- JSON error `Unexpected token 'ï»¿'`
+- JSON parse error with hidden leading character in `package.json`
   - Cause: UTF-8 BOM
   - Fix: save files as UTF-8 without BOM
 
-- Error `useSearchParams should be wrapped in suspense`
-  - Already handled: page is wrapped in a `Suspense` boundary
+- `useSearchParams should be wrapped in suspense`
+  - Fix already applied in `app/page.tsx` via `Suspense`
+
+## Update Log
+
+### 2026-02-18
+- Initial full MVP build (Next.js + TS + Tailwind + Leaflet)
+- Added highway-only geo filtering and nearest/next logic
+- Added map/list, filters, range mode, quick cards, route confidence
+- Added Malaysia data importer script (`npm run data:import:my`)
+- Added spatial index helper for large dataset performance
+- Added UI/UX upgrades:
+  - compact filter mode
+  - map/list toggle
+  - sticky active-filter summary
+  - map range ring + legend
+  - selected-stop sticky navigation action
+- Converted entire app copy to English
+- Updated README to full English + current architecture/feature coverage
 
 ## Notes
 
 - No paid APIs are used.
 - Data is local JSON by default.
-- For production with large OSM imports, add manual validation for tagging consistency.
+- For production with large OSM data, validate tags/direction consistency before release.
