@@ -142,6 +142,25 @@ npm run dev
 http://localhost:3000
 ```
 
+## Data Malaysia Penuh (Highway + R&R + Stesen Minyak)
+
+Untuk masukkan data seluruh Malaysia secara automatik ke fail local JSON:
+
+```bash
+npm run data:import:my
+```
+
+Script ini akan jana:
+- `data/generated/highways.full.json`
+- `data/generated/rnr.full.json`
+- `data/generated/stations.full.json`
+
+App akan **auto guna fail generated** jika tidak kosong. Jika kosong, app fallback ke sample dalam `data/*.json`.
+
+Nota:
+- Sumber automatik datang dari OpenStreetMap (Overpass).
+- Untuk production, buat semakan manual kerana mapping `direction/highwayId/type` mungkin perlukan normalisasi tambahan bergantung tagging OSM.
+
 ## Cara Guna
 
 1. Tekan `Guna lokasi saya` dan benarkan permission.
