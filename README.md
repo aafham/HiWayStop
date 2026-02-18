@@ -17,12 +17,17 @@ Aplikasi ini hanya memaparkan R&R dan stesen minyak yang patuh peraturan corrido
 
 1. Home
 - Butang `Guna lokasi saya`
+- Kad pantas bawah header:
+  - `R&R terdekat`
+  - `Stesen minyak terdekat` (highway-only)
 - Toggle `Semua / R&R / Minyak`
 - Medan `Destinasi (optional)` (placeholder routing)
 - Papar highway semasa berdasarkan polyline terdekat, atau `Tidak pasti`
 
 2. Map + List
 - Peta pin untuk R&R dan stesen minyak highway-only
+- Marker lokasi semasa yang jelas + bulatan radius sekitar lokasi
+- Auto recenter map ke current location selepas geolocation berjaya
 - Bottom sheet list boleh scroll
 - Tap card/pin: nama, highway, arah, jarak, ETA, kemudahan, brand
 
@@ -44,6 +49,10 @@ Aplikasi ini hanya memaparkan R&R dan stesen minyak yang patuh peraturan corrido
 - Multi-select brand minyak
 - Filter kemudahan R&R (`surau`, `toilet`, `foodcourt`, `ev`)
 - Slider corridor buffer `200m - 800m`
+- UI penapis versi kemas:
+  - segmented mode button
+  - chip counter (jumlah pilihan)
+  - input dengan ikon dan hierarchy visual mobile-first
 
 6. Fuel Range Mode (bonus)
 - Input range km
@@ -63,6 +72,8 @@ components/
   HighwayMap.tsx
   ItemCard.tsx
   TopBar.tsx
+scripts/
+  import-malaysia-from-osm.mjs
 lib/
   data.ts
   geo.ts
@@ -71,6 +82,10 @@ data/
   highways.json
   rnr.json
   stations.json
+  generated/
+    highways.full.json
+    rnr.full.json
+    stations.full.json
 types/
   index.ts
 ```
@@ -164,13 +179,25 @@ Nota:
 ## Cara Guna
 
 1. Tekan `Guna lokasi saya` dan benarkan permission.
-2. Pilih mode `Semua`, `R&R`, atau `Minyak`.
-3. Ubah filter brand, kemudahan, dan corridor buffer.
-4. Semak seksyen:
+2. Lihat kad ringkas bawah header untuk `R&R terdekat` dan `Stesen minyak terdekat`.
+3. Pilih mode `Semua`, `R&R`, atau `Minyak`.
+4. Ubah filter brand, kemudahan, dan corridor buffer.
+5. Semak seksyen:
 - `Terdekat dari anda`
 - `Seterusnya ikut arah`
-5. Jika arah tidak dikesan, pilih arah manual.
-6. Masukkan `Fuel Range Mode` untuk semak capaian range.
+6. Jika arah tidak dikesan, pilih arah manual.
+7. Masukkan `Fuel Range Mode` untuk semak capaian range.
+
+## Deploy Vercel (Ringkas)
+
+1. Push repo ke GitHub.
+2. Import project di Vercel (preset `Next.js`, root `./`).
+3. Pastikan tiada dummy env var diperlukan.
+4. Deploy.
+5. Untuk update seterusnya, `git push` sahaja (auto redeploy).
+
+Nota:
+- Simpan fail sebagai `UTF-8 without BOM` untuk elak build error JSON/TS di Vercel.
 
 ## Migrasi Ke DB (bila perlu)
 
