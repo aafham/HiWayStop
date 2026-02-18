@@ -1,95 +1,85 @@
 # HiWayStop
 
-Tagline: **Cari R&R & minyak-khusus di lebuh raya.**
+Tagline: **Find R&R and fuel stops exclusively on Malaysian highways.**
 
-HiWayStop ialah web app highway-only untuk pengguna lebuh raya Malaysia.
-Aplikasi ini fokus kepada R&R dan stesen minyak sepanjang lebuh raya sahaja, dengan logik corridor untuk tapis station luar highway.
+HiWayStop is a highway-only web app for highway users in Malaysia.
+It focuses on R&R areas and fuel stations along highways only, with a corridor-based filter that removes off-highway stations.
 
-## Ringkasan
+## Overview
 
-- Platform: Next.js App Router + TypeScript
+- Framework: Next.js App Router + TypeScript
 - UI: Tailwind CSS (mobile-first)
-- Peta: Leaflet + OpenStreetMap
-- Lokasi: Browser Geolocation API
+- Map: Leaflet + OpenStreetMap
+- Location: Browser Geolocation API
 - Data: Local JSON (`/data`) + optional generated full dataset (`/data/generated`)
 
-## Ciri Utama Website
+## Core Features
 
-### 1) Home & Lokasi
-- Butang `Guna lokasi saya`
-- Status lokasi + highway semasa (closest polyline)
-- Banner keselamatan: jangan guna app semasa memandu
-- Kad cepat:
-  - `R&R terdekat`
-  - `Stesen minyak terdekat`
+### 1) Home & Location
+- `Use my location` button
+- Current location status + current highway (closest polyline)
+- Safety banner
+- Quick cards:
+  - `Nearest R&R`
+  - `Nearest Fuel Station`
 
-### 2) Penapis (Filter UX)
-- Toggle view: `Semua`, `R&R`, `Minyak`
-- `Destinasi (optional)` + quick suggestion
-- Brand minyak multi-select
-- Kemudahan R&R multi-select (`surau`, `toilet`, `foodcourt`, `ev`)
-- Slider corridor `200m - 800m`
-- Fuel range mode + preset quick range chips
-- Quick preset:
-  - `Wajib Minyak`
-  - `Family Stop`
-  - `EV Sahaja`
-- Reset filter 1-tap
-- Sticky mini summary filter aktif
-- Compact filter mode on scroll (boleh expand/collapse)
+### 2) Filters
+- View toggle: `All`, `R&R`, `Fuel`
+- Optional destination input + quick suggestions
+- Fuel brand multi-select
+- R&R facility multi-select (`surau`, `toilet`, `foodcourt`, `ev`)
+- Corridor slider `200m - 800m`
+- Fuel range mode + quick range chips
+- Quick presets (`Fuel First`, `Family Stop`, `EV Only`)
+- 1-tap reset, select all, clear all
+- Sticky active-filter summary
+- Compact filter mode on scroll
 
-### 3) Map + List Experience
-- Toggle paparan: `Map`, `List`, `Map + List`
-- Marker lokasi semasa jelas + recenter automatik
-- Range ring atas map bila range diisi
-- Marker `off-range` dikelabukan
-- Map legend (R&R / Minyak / Lokasi / Off-range)
-- Bottom sheet list scrollable + skeleton loading
+### 3) Map + List UX
+- View mode switch: `Map`, `List`, `Map + List`
+- Clear current-location marker + auto recenter
+- Range ring shown on map when fuel range is set
+- Off-range markers dimmed
+- Built-in map legend
+- Scrollable bottom sheet list + loading skeletons
 
-### 4) Nearest, Next, Priority
-- `Terdekat dari anda` (Top 10)
-- `Seterusnya ikut arah` (R&R + Minyak)
-- Priority card: `Seterusnya dalam laluan`
+### 4) Nearest / Next / Priority
+- `Nearest to you (Top 10)`
+- `Next along direction` for both R&R and fuel
+- Priority card: `Next Stop On Route`
 - Trip panel:
-  - Next stop km
-  - ETA next
-  - Fuel dalam range
-  - Cadangan rehat
+  - next stop distance
+  - next ETA
+  - fuel in range
+  - rest suggestion
 
-### 5) Sorting & Decision Support
-- Sort list terdekat:
-  - `Paling dekat`
-  - `ETA terpantas`
-  - `A-Z`
-- ETA urgency color:
-  - hijau (<10 min)
-  - kuning (10-20 min)
-  - kelabu (>20 min)
+### 5) Decision Aids
+- Sort list by:
+  - nearest distance
+  - fastest ETA
+  - A-Z
+  - route confidence
+- ETA urgency colors (green/yellow/gray)
+- Route confidence badges (`R&R Site`, `R&R-linked`, `On Corridor`)
+- Direct `Navigate` action from cards/detail
 
-### 6) On-Route Confidence + Navigation
-- Badge confidence:
-  - `R&R Site`
-  - `R&R-linked`
-  - `On Corridor`
-- Butang `Navigasi` (Google Maps directions URL)
+### 6) Smart Empty State
+- Context-aware empty reason
+- One-tap fixes:
+  - reset brands
+  - reset facilities
+  - increase buffer
+  - clear destination
 
-### 7) Empty State Pintar
-- Empty state ikut konteks filter aktif
-- Suggestion tindakan cepat:
-  - reset brand
-  - reset kemudahan
-  - naikkan buffer
-  - kosongkan destinasi
+## Highway-only Rule (Core Logic)
 
-## Highway-only Rule (Core)
-
-Stesen minyak dipaparkan hanya jika:
-1. berada dalam `highway corridor buffer`, atau
+Fuel stations are shown only if:
+1. they are within the highway corridor buffer, or
 2. `type = "RNR_STATION"`.
 
-Station luar corridor akan ditapis keluar walaupun jarak dekat.
+Stations outside the corridor are excluded even if they are physically near.
 
-## Struktur Projek
+## Project Structure
 
 ```text
 app/
@@ -135,7 +125,7 @@ types/
 - `id`, `name`, `brand`, `type`
 - `highwayId`, `direction`, `lat`, `lng`, `rnrId`
 
-## Fungsi / Modul Penting
+## Key Modules
 
 ### `lib/geo.ts`
 - `haversineKm`
@@ -148,90 +138,63 @@ types/
 - `detectClosestHighway`
 
 ### `lib/spatial.ts`
-- Grid spatial index ringkas untuk percepat nearest query bila dataset besar.
+- Lightweight spatial grid indexing for faster nearest queries on large datasets.
 
 ### `lib/navigation.ts`
-- Bina URL navigation terus ke destinasi.
+- Generates external driving navigation links.
 
 ### `lib/data.ts`
-- Auto fallback:
-  - guna `data/generated/*.full.json` jika ada data
-  - fallback ke sample `data/*.json` jika tiada
+- Automatic fallback strategy:
+  - use `data/generated/*.full.json` if populated
+  - fallback to sample `data/*.json` if not
 
-## Cara Run (Local)
+## Run Locally
 
-1. Install dependency:
+1. Install dependencies:
 ```bash
 npm install
 ```
 
-2. Jalankan dev server:
+2. Start dev server:
 ```bash
 npm run dev
 ```
 
-3. Buka:
+3. Open:
 ```text
 http://localhost:3000
 ```
 
-## Generate Data Malaysia Penuh
+## Generate Full Malaysia Dataset
 
 ```bash
 npm run data:import:my
 ```
 
-Script akan jana:
+Generated files:
 - `data/generated/highways.full.json`
 - `data/generated/rnr.full.json`
 - `data/generated/stations.full.json`
 
-## Deploy Vercel
+## Deploy on Vercel
 
-1. Push repo ke GitHub
-2. Import project di Vercel (`Next.js`, root `./`)
-3. Remove dummy env vars (jika ada)
+1. Push repo to GitHub
+2. Import project in Vercel (`Next.js`, root `./`)
+3. Remove any dummy env vars (if present)
 4. Deploy
-5. Update seterusnya: `git push` -> auto redeploy
+5. Future updates: `git push` triggers auto redeploy
 
-## Troubleshooting Ringkas
+## Quick Troubleshooting
 
-- Error JSON `Unexpected token '﻿'`
-  - Punca: UTF-8 BOM
-  - Fix: simpan fail sebagai UTF-8 without BOM
+- JSON error `Unexpected token 'ï»¿'`
+  - Cause: UTF-8 BOM
+  - Fix: save files as UTF-8 without BOM
 
 - Error `useSearchParams should be wrapped in suspense`
-  - Sudah ditangani: page client dibalut dengan `Suspense`
+  - Already handled: page is wrapped in a `Suspense` boundary
 
-## Update Log
+## Notes
 
-### 2026-02-18 (v0.1.0 -> v0.3.0)
-- Bina app penuh dari kosong (Next.js + TS + Tailwind + Leaflet)
-- Tambah dataset sample highways/R&R/stations
-- Implement highway-only corridor filtering
-- Implement nearest + next-by-direction
-- Tambah Fuel Range mode
-- Tambah quick cards nearest bawah header
-- Fix encoding issue (UTF-8 without BOM) untuk Vercel
-- Fix type issue `getNextAlongHighway`
-- Fix `useSearchParams` dengan `Suspense`
-- Tambah import script data Malaysia dari OSM (generated JSON)
-- Polish UI/UX besar:
-  - quick preset
-  - reset filter
-  - sticky summary
-  - map/list toggle
-  - compact filter on scroll
-  - map legend + range ring
-  - urgency ETA colors
-  - priority next stop card
-  - trip summary panel
-  - contextual empty state
-  - on-route confidence badges
-  - navigate button per card
-
-## Nota
-
-- Tiada API berbayar digunakan.
-- Semua data daripada local JSON.
-- Untuk production dengan data besar, disyorkan semakan manual dataset OSM (direction/tag consistency).
+- No paid APIs are used.
+- Data is local JSON by default.
+- For production with large OSM imports, add manual validation for tagging consistency.

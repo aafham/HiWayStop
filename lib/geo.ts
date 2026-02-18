@@ -208,6 +208,7 @@ export function getNextAlongHighway<T extends { lat: number; lng: number }>(
 
 export function detectClosestHighway(userLoc: LatLng, highways: Highway[]): {
   highwayId: string | null;
+  nearestHighwayId: string | null;
   distanceMeters: number;
 } {
   let bestId: string | null = null;
@@ -225,6 +226,7 @@ export function detectClosestHighway(userLoc: LatLng, highways: Highway[]): {
 
   return {
     highwayId: bestDistance <= 2000 ? bestId : null,
+    nearestHighwayId: bestId,
     distanceMeters: bestDistance,
   };
 }
