@@ -4,11 +4,16 @@ import { LocateFixed } from 'lucide-react';
 
 type TopBarProps = {
   locationStatus: string;
+  isHighwayUncertain: boolean;
   onUseLocation: () => void;
   loading: boolean;
 };
 
-export default function TopBar({ locationStatus, onUseLocation, loading }: TopBarProps) {
+export default function TopBar({ locationStatus, isHighwayUncertain, onUseLocation, loading }: TopBarProps) {
+  const locationClass = isHighwayUncertain
+    ? 'border-amber-300 bg-amber-50 text-amber-900'
+    : 'border-slate-200 bg-white text-slate-600';
+
   return (
     <header className="sticky top-0 z-40 border-b border-white/70 bg-white/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3.5">
@@ -17,7 +22,7 @@ export default function TopBar({ locationStatus, onUseLocation, loading }: TopBa
           <p className="text-xs font-medium text-slate-500">Find R&R and fuel stops exclusively on highways.</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="hidden rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-600 shadow-sm sm:inline">
+          <span className={`hidden rounded-full border px-3 py-1 text-xs shadow-sm sm:inline ${locationClass}`}>
             {locationStatus}
           </span>
           <button
@@ -31,7 +36,7 @@ export default function TopBar({ locationStatus, onUseLocation, loading }: TopBa
           </button>
         </div>
       </div>
-      <div className="border-t border-slate-100/80 bg-white/70 px-4 py-2 text-xs text-slate-600 sm:hidden">{locationStatus}</div>
+      <div className={`border-t px-4 py-2 text-xs sm:hidden ${isHighwayUncertain ? 'border-amber-200 bg-amber-50 text-amber-900' : 'border-slate-100/80 bg-white/70 text-slate-600'}`}>{locationStatus}</div>
     </header>
   );
 }

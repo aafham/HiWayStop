@@ -2,7 +2,7 @@
 
 Tagline: **Find R&R and fuel stops exclusively on Malaysian highways.**
 
-HiWayStop is a highway-only web app built for Malaysian highway users.
+HiWayStop is a highway-only web app for Malaysian expressway users.
 It shows only highway-relevant R&R areas and fuel stations using corridor-based filtering.
 
 ## Stack
@@ -15,12 +15,12 @@ It shows only highway-relevant R&R areas and fuel stations using corridor-based 
 
 ## What The App Does
 
-1. Detects your current location and nearest highway
+1. Detects current location and nearest highway
 2. Shows nearest highway-only stops (R&R + fuel)
 3. Filters fuel stations by corridor and R&R-linked station type
 4. Supports range-based visibility (reachable vs out-of-range)
 5. Provides next stops along travel direction
-6. Offers direct navigation links for each stop
+6. Provides direct navigation links for each stop
 
 ## Main Features
 
@@ -33,6 +33,7 @@ It shows only highway-relevant R&R areas and fuel stations using corridor-based 
   - Nearest Fuel Station
 
 ### Filter Experience
+- Global filter panel can be collapsed/expanded (default: collapsed)
 - View mode: `All`, `R&R`, `Fuel`
 - Destination input (context only for now)
 - Fuel brand filters (multi-select)
@@ -41,8 +42,7 @@ It shows only highway-relevant R&R areas and fuel stations using corridor-based 
 - Fuel range input + quick presets
 - Quick presets: `Fuel First`, `Family Stop`, `EV Only`
 - `Select all`, `Clear all`, `Reset`
-- Compact filter mode on scroll
-- Sticky active-filter summary
+- Sticky active-filter summary (shown when filters are collapsed)
 
 ### Map + List UX
 - View mode switch: `Map`, `List`, `Map + List`
@@ -50,8 +50,9 @@ It shows only highway-relevant R&R areas and fuel stations using corridor-based 
 - Range ring on map when range is set
 - Off-range markers dimmed
 - Built-in legend
+- Empty-map hint when filters hide all pins
 - Bottom sheet list with skeleton loading
-- Floating “View map” shortcut when deep in list
+- Floating `View map` shortcut when deep in list
 
 ### Nearest, Next, Trip
 - Nearest Top 10
@@ -75,9 +76,13 @@ It shows only highway-relevant R&R areas and fuel stations using corridor-based 
   - `R&R-linked`
   - `On Corridor`
 - Sticky selected-stop action bar with `Navigate`
+- Quick open actions in list:
+  - `Open nearest`
+  - `Open nearest fuel`
+  - `Open nearest R&R`
 
 ### Smart Empty State
-- Context-aware “no result” reason
+- Context-aware "no result" reason
 - One-tap fixes:
   - reset brands
   - reset facilities
@@ -172,7 +177,7 @@ Outputs:
 2. Import project in Vercel (`Next.js`, root `./`)
 3. Remove dummy env vars if any
 4. Deploy
-5. Later updates: `git push` for auto redeploy
+5. For later updates, push to `main` for auto redeploy
 
 ## Troubleshooting
 
@@ -183,6 +188,10 @@ Outputs:
 - `useSearchParams should be wrapped in suspense`
   - Fix already applied in `app/page.tsx` via `Suspense`
 
+- `npm` command not found locally
+  - Cause: Node.js/NPM is not installed or not in PATH
+  - Fix: install Node.js LTS and verify with `node -v` and `npm -v`
+
 ## Update Log
 
 ### 2026-02-18
@@ -192,16 +201,22 @@ Outputs:
 - Added Malaysia data importer script (`npm run data:import:my`)
 - Added spatial index helper for large dataset performance
 - Added UI/UX upgrades:
-  - compact filter mode
   - map/list toggle
   - sticky active-filter summary
   - map range ring + legend
   - selected-stop sticky navigation action
 - Converted entire app copy to English
-- Updated README to full English + current architecture/feature coverage
+- Updated README to full English + architecture/feature coverage
+- UI refinement update:
+  - global filter collapse/expand control for cleaner layout
+  - default collapsed filter state to reduce vertical clutter
+  - simplified active filter chips for minimal look
+  - improved uncertain highway status emphasis in top bar
+  - map empty-state hint + polished legend card
+  - quick open actions in list when no selection is active
 
 ## Notes
 
 - No paid APIs are used.
 - Data is local JSON by default.
-- For production with large OSM data, validate tags/direction consistency before release.
+- For large OSM-based production data, validate tags and direction consistency before release.

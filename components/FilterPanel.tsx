@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Check, Fuel, Route, Search, SlidersHorizontal, Sparkles, Undo2 } from 'lucide-react';
 import { FacilityFlags, ViewMode } from '@/types';
 
@@ -56,6 +57,9 @@ export default function FilterPanel({
   selectAllFacilities,
   clearFacilities,
 }: FilterPanelProps) {
+  const [destinationOpen, setDestinationOpen] = useState(false);
+  const [brandsOpen, setBrandsOpen] = useState(false);
+  const [facilitiesOpen, setFacilitiesOpen] = useState(false);
   const activeFacilitiesCount = Object.values(facilities).filter(Boolean).length;
   const summarize = (items: string[], limit = 3) =>
     items.length <= limit ? items.join(', ') : `${items.slice(0, limit).join(', ')} +${items.length - limit} more`;
@@ -85,7 +89,7 @@ export default function FilterPanel({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
+      <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-3.5 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Quick Presets</p>
         <div className="flex flex-wrap gap-2">
           <button type="button" onClick={() => onApplyPreset('FUEL_FIRST')} className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-brand-300 hover:bg-brand-50">Fuel First</button>
@@ -94,7 +98,7 @@ export default function FilterPanel({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-2 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
+      <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-2 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
         <div className="grid grid-cols-3 gap-2">
           {viewModes.map((mode) => (
             <button
@@ -111,67 +115,102 @@ export default function FilterPanel({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
-        <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">Destination (optional)</label>
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="Example: Ipoh / Kuantan" className="w-full rounded-xl border border-slate-300 bg-slate-50 py-2.5 pl-9 pr-3 text-sm outline-none ring-brand-500 focus:border-brand-500 focus:bg-white focus:ring" />
-        </div>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {destinationSuggestions.map((item) => (
-            <button key={item} type="button" onClick={() => setDestination(item)} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-200">{item}</button>
-          ))}
-        </div>
-        <p className="mt-2 text-[11px] text-slate-500">Full destination routing is not active yet. This field currently stores trip context.</p>
+      <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-3.5 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
+        <button
+          type="button"
+          onClick={() => setDestinationOpen((prev) => !prev)}
+          className="flex w-full items-center justify-between text-left"
+        >
+          <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Destination (optional)</span>
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+            {destination.trim() ? 'Set' : 'Off'}
+          </span>
+        </button>
+        {destinationOpen ? (
+          <>
+            <div className="relative mt-2">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="Example: Ipoh / Kuantan" className="w-full rounded-xl border border-slate-300 bg-slate-50 py-2.5 pl-9 pr-3 text-sm outline-none ring-brand-500 focus:border-brand-500 focus:bg-white focus:ring" />
+            </div>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {destinationSuggestions.map((item) => (
+                <button key={item} type="button" onClick={() => setDestination(item)} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-200">{item}</button>
+              ))}
+            </div>
+            <p className="mt-2 text-[11px] text-slate-500">Full destination routing is not active yet. This field currently stores trip context.</p>
+          </>
+        ) : null}
       </div>
 
-      <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
-        <div className="mb-2 flex items-center justify-between">
+      <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-3.5 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
+        <button
+          type="button"
+          onClick={() => setBrandsOpen((prev) => !prev)}
+          className="mb-2 flex w-full items-center justify-between text-left"
+        >
           <p className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-500"><Fuel className="h-3.5 w-3.5" />Fuel Brands</p>
           <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">{selectedBrands.length} selected</span>
-        </div>
-        <div className="mb-2 flex gap-2">
-          <button type="button" onClick={selectAllBrands} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-200">Select all</button>
-          <button type="button" onClick={clearBrands} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-200">Clear all</button>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {brands.map((brand) => {
-            const active = selectedBrands.includes(brand);
-            return (
-              <button key={brand} type="button" onClick={() => toggleBrand(brand)} className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${active ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400'}`}>
-                {active ? <Check className="mr-1 inline h-3.5 w-3.5" /> : null}
-                {brand}
-              </button>
-            );
-          })}
-        </div>
-        {selectedBrands.length > 0 ? <p className="mt-2 text-[11px] text-slate-500">Selected: {summarize(selectedBrands)}</p> : null}
+        </button>
+        {!brandsOpen && selectedBrands.length > 0 ? (
+          <p className="text-[11px] text-slate-500">Selected: {summarize(selectedBrands)}</p>
+        ) : null}
+        {brandsOpen ? (
+          <>
+            <div className="mb-2 flex gap-2">
+              <button type="button" onClick={selectAllBrands} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-200">Select all</button>
+              <button type="button" onClick={clearBrands} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-200">Clear all</button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {brands.map((brand) => {
+                const active = selectedBrands.includes(brand);
+                return (
+                  <button key={brand} type="button" onClick={() => toggleBrand(brand)} className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${active ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400'}`}>
+                    {active ? <Check className="mr-1 inline h-3.5 w-3.5" /> : null}
+                    {brand}
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        ) : null}
       </div>
 
-      <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
-        <div className="mb-2 flex items-center justify-between">
+      <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-3.5 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
+        <button
+          type="button"
+          onClick={() => setFacilitiesOpen((prev) => !prev)}
+          className="mb-2 flex w-full items-center justify-between text-left"
+        >
           <p className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-500"><Sparkles className="h-3.5 w-3.5" />R&R Facilities</p>
           <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">{activeFacilitiesCount} selected</span>
-        </div>
-        <div className="mb-2 flex gap-2">
-          <button type="button" onClick={selectAllFacilities} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-200">Select all</button>
-          <button type="button" onClick={clearFacilities} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-200">Clear all</button>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {(['surau', 'toilet', 'foodcourt', 'ev'] as Array<keyof FacilityFlags>).map((facility) => {
-            const active = facilities[facility];
-            return (
-              <button key={facility} type="button" onClick={() => toggleFacility(facility)} className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${active ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400'}`}>
-                {active ? <Check className="mr-1 inline h-3.5 w-3.5" /> : null}
-                {facility.toUpperCase()}
-              </button>
-            );
-          })}
-        </div>
-        {activeFacilitiesCount > 0 ? <p className="mt-2 text-[11px] text-slate-500">Selected: {summarize((['surau', 'toilet', 'foodcourt', 'ev'] as Array<keyof FacilityFlags>).filter((k) => facilities[k]).map((k) => k.toUpperCase()))}</p> : null}
+        </button>
+        {!facilitiesOpen && activeFacilitiesCount > 0 ? (
+          <p className="text-[11px] text-slate-500">
+            Selected: {summarize((['surau', 'toilet', 'foodcourt', 'ev'] as Array<keyof FacilityFlags>).filter((k) => facilities[k]).map((k) => k.toUpperCase()))}
+          </p>
+        ) : null}
+        {facilitiesOpen ? (
+          <>
+            <div className="mb-2 flex gap-2">
+              <button type="button" onClick={selectAllFacilities} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-200">Select all</button>
+              <button type="button" onClick={clearFacilities} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-200">Clear all</button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {(['surau', 'toilet', 'foodcourt', 'ev'] as Array<keyof FacilityFlags>).map((facility) => {
+                const active = facilities[facility];
+                return (
+                  <button key={facility} type="button" onClick={() => toggleFacility(facility)} className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${active ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400'}`}>
+                    {active ? <Check className="mr-1 inline h-3.5 w-3.5" /> : null}
+                    {facility.toUpperCase()}
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        ) : null}
       </div>
 
-      <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
+      <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-3.5 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
         <div className="mb-2 flex items-center justify-between text-xs font-semibold text-slate-600">
           <span className="inline-flex items-center gap-1"><Route className="h-3.5 w-3.5" />Corridor buffer</span>
           <span className="rounded-full bg-brand-50 px-2 py-0.5 text-brand-700">{bufferMeters}m</span>
@@ -184,7 +223,7 @@ export default function FilterPanel({
         <p className="mt-1 text-[11px] text-slate-500">Larger buffer = more stations may pass the highway filter.</p>
       </div>
 
-      <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
+      <div className="rounded-2xl border border-slate-200/60 bg-white/80 p-3.5 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
         <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500" htmlFor="range">Fuel Range Mode (km)</label>
         <div className="relative">
           <input id="range" type="number" min={0} value={rangeKm} onChange={(e) => setRangeKm(e.target.value)} placeholder="Example: 350" className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 pr-12 text-sm outline-none ring-brand-500 focus:border-brand-500 focus:bg-white focus:ring" />

@@ -50,3 +50,18 @@ button {
   animation: filter-pop 180ms ease-out;
 }
 
+@keyframes rise-in {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ui-rise {
+  animation: rise-in 160ms ease-out;
+}
+

@@ -47,9 +47,10 @@ function RecenterMap({ userLoc }: { userLoc: LatLng | null }) {
 export default function HighwayMap({ userLoc, highways, places, onSelect, rangeKm }: HighwayMapProps) {
   const center = userLoc ?? { lat: 3.139, lng: 101.6869 };
   const polylines = useMemo(() => highways.map((h) => h.polyline.map((p) => [p.lat, p.lng] as [number, number])), [highways]);
+  const hasPlaces = places.length > 0;
 
   return (
-    <div className="relative h-[36vh] w-full overflow-hidden border-b border-slate-200">
+    <div className="relative h-[36vh] w-full overflow-hidden rounded-2xl border border-slate-200/80">
       <MapContainer center={[center.lat, center.lng]} zoom={8} scrollWheelZoom className="h-full w-full">
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
         <RecenterMap userLoc={userLoc} />
@@ -82,12 +83,18 @@ export default function HighwayMap({ userLoc, highways, places, onSelect, rangeK
         })}
       </MapContainer>
 
-      <div className="absolute bottom-3 left-3 rounded-xl bg-white/95 p-2 text-[10px] font-semibold text-slate-700 shadow">
-        <p className="mb-1">Legend</p>
-        <div className="flex items-center gap-1"><span className="inline-block h-2.5 w-2.5 rounded-full bg-[#159570]" />R&R</div>
-        <div className="flex items-center gap-1"><span className="inline-block h-2.5 w-2.5 rounded-full bg-[#0ea5e9]" />Fuel</div>
-        <div className="flex items-center gap-1"><span className="inline-block h-2.5 w-2.5 rounded-full bg-[#0f6d53]" />Your location</div>
-        <div className="flex items-center gap-1"><span className="inline-block h-2.5 w-2.5 rounded-full bg-[#94a3b8]" />Off-range</div>
+      {!hasPlaces ? (
+        <div className="absolute left-1/2 top-3 z-[500] w-[88%] max-w-sm -translate-x-1/2 rounded-xl border border-slate-200/90 bg-white/95 px-3 py-2 text-xs text-slate-700 shadow-lg">
+          No map pins for current filters. Try increasing corridor buffer or reset filters.
+        </div>
+      ) : null}
+
+      <div className="absolute bottom-3 left-3 rounded-xl border border-slate-200/80 bg-white/95 px-2.5 py-2 text-[10px] font-semibold text-slate-700 shadow-lg backdrop-blur">
+        <p className="mb-1 text-[10px] uppercase tracking-wide text-slate-500">Legend</p>
+        <div className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-full bg-[#159570]" />R&R</div>
+        <div className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-full bg-[#0ea5e9]" />Fuel</div>
+        <div className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-full bg-[#0f6d53]" />Your location</div>
+        <div className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-full bg-[#94a3b8]" />Off-range</div>
       </div>
     </div>
   );

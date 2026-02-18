@@ -27,6 +27,20 @@ export default function BottomSheet({ nearest, nextRnR, nextFuel, selected, onSe
 
   return (
     <section className="max-h-[58vh] overflow-y-auto rounded-t-3xl border-t border-slate-200/80 bg-white/95 p-4 shadow-sheet backdrop-blur">
+      {!selected && nearest.length > 0 ? (
+        <div className="mb-3 flex flex-wrap gap-2">
+          <button type="button" onClick={() => onSelect(nearest[0])} className="rounded-full bg-brand-500 px-3 py-1.5 text-xs font-semibold text-white">Open nearest</button>
+          <button type="button" onClick={() => {
+            const nearestFuel = nearest.find((item) => item.kind === 'FUEL');
+            if (nearestFuel) onSelect(nearestFuel);
+          }} className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700">Open nearest fuel</button>
+          <button type="button" onClick={() => {
+            const nearestRnr = nearest.find((item) => item.kind === 'RNR');
+            if (nearestRnr) onSelect(nearestRnr);
+          }} className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700">Open nearest R&R</button>
+        </div>
+      ) : null}
+
       {selected ? (
         <div className="mb-4 rounded-2xl border border-brand-100 bg-gradient-to-br from-brand-50 to-white p-3.5">
           <p className="text-sm font-bold text-brand-900">{selected.name}</p>

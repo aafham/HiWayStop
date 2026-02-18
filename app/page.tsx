@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { AlertTriangle, Compass, LocateFixed, MapPinOff, Navigation, PanelBottomOpen, PanelTopOpen, ShieldAlert } from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronUp, Compass, LocateFixed, MapPinOff, Navigation, ShieldAlert } from 'lucide-react';
 import BottomSheet from '@/components/BottomSheet';
 import FilterPanel from '@/components/FilterPanel';
 import TopBar from '@/components/TopBar';
@@ -73,20 +73,14 @@ function HomePageContent() {
 
   const [showMap, setShowMap] = useState(true);
   const [showList, setShowList] = useState(true);
-  const [isFilterCompact, setIsFilterCompact] = useState(false);
-  const [isFilterExpanded, setIsFilterExpanded] = useState(true);
+  const [isFilterExpanded, setIsFilterExpanded] = useState(false);
   const [filterFlash, setFilterFlash] = useState(false);
   const [showMapPeek, setShowMapPeek] = useState(false);
 
   useEffect(() => runGeoSelfCheck(), []);
 
   useEffect(() => {
-    const onScroll = () => {
-      const compact = window.scrollY > 480;
-      setIsFilterCompact(compact);
-      if (!compact) setIsFilterExpanded(true);
-      setShowMapPeek(window.scrollY > 1100 && showList);
-    };
+    const onScroll = () => setShowMapPeek(window.scrollY > 1100 && showList);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
@@ -285,6 +279,17 @@ function HomePageContent() {
   const activeFacilities = Object.entries(facilityFilter).filter(([, value]) => value).map(([key]) => key.toUpperCase());
   const summarizeSelected = (items: string[], limit = 3): string => items.length <= limit ? items.join(', ') : `${items.slice(0, limit).join(', ')} +${items.length - limit} more`;
   const activeFiltersCount = (destination.trim() ? 1 : 0) + (viewMode !== 'ALL' ? 1 : 0) + (selectedBrands.length > 0 ? 1 : 0) + (activeFacilities.length > 0 ? 1 : 0) + (bufferMeters !== 400 ? 1 : 0) + (rangeKm !== null ? 1 : 0);
+  const isHighwayUncertain = Boolean(userLoc && !currentHighway && !locationLoading && !locationError);
+  const activeFilterTags = [
+    viewMode !== 'ALL' ? `Mode: ${viewMode}` : null,
+    selectedBrands.length > 0 ? `Brands: ${summarizeSelected(selectedBrands, 2)}` : null,
+    activeFacilities.length > 0 ? `Facilities: ${summarizeSelected(activeFacilities, 2)}` : null,
+    bufferMeters !== 400 ? `Buffer: ${bufferMeters}m` : null,
+    rangeKm !== null ? `Range: ${rangeKm}km` : null,
+    destination.trim() ? `Destination: ${destination.trim()}` : null,
+  ].filter(Boolean) as string[];
+  const visibleFilterTags = activeFilterTags.slice(0, 2);
+  const hiddenFilterTagCount = Math.max(0, activeFilterTags.length - visibleFilterTags.length);
 
   useEffect(() => {
     setFilterFlash(true);
@@ -322,18 +327,10 @@ function HomePageContent() {
 
   return (
     <main className="mx-auto min-h-screen max-w-5xl overflow-hidden bg-white/70 shadow-[0_18px_60px_rgba(15,23,42,0.12)] ring-1 ring-slate-200/80 backdrop-blur">
-      <TopBar locationStatus={locationStatus} onUseLocation={useCurrentLocation} loading={locationLoading} />
+      <TopBar locationStatus={locationStatus} isHighwayUncertain={isHighwayUncertain} onUseLocation={useCurrentLocation} loading={locationLoading} />
 
       <section className="border-b border-amber-200/80 bg-amber-50/90 px-4 py-2 text-[11px] font-semibold text-amber-900">
         <p className="inline-flex items-center gap-1"><ShieldAlert className="h-3.5 w-3.5" />For safety, do not use this app while driving. Use it only when stopped.</p>
-      </section>
-
-      <section className="sticky top-[106px] z-30 border-b border-slate-200/80 bg-white/90 px-4 py-2 backdrop-blur-xl">
-        <div className="inline-flex rounded-full bg-slate-100 p-1">
-          <button type="button" onClick={() => { setShowMap(true); setShowList(false); }} className={`rounded-full px-3 py-1 text-xs font-semibold ${showMap && !showList ? 'bg-brand-500 text-white' : 'text-slate-700'}`}>Map</button>
-          <button type="button" onClick={() => { setShowMap(false); setShowList(true); }} className={`rounded-full px-3 py-1 text-xs font-semibold ${!showMap && showList ? 'bg-brand-500 text-white' : 'text-slate-700'}`}>List</button>
-          <button type="button" onClick={() => { setShowMap(true); setShowList(true); }} className={`rounded-full px-3 py-1 text-xs font-semibold ${showMap && showList ? 'bg-brand-500 text-white' : 'text-slate-700'}`}>Map + List</button>
-        </div>
       </section>
 
       <section className="grid gap-2 border-b border-slate-200/70 bg-slate-50/70 px-4 py-3 sm:grid-cols-2">
@@ -356,16 +353,40 @@ function HomePageContent() {
         )}
       </section>
 
-      {isFilterCompact ? (
-        <section className="border-b border-slate-200/70 bg-slate-50/70 px-4 py-2">
-          <button type="button" onClick={() => setIsFilterExpanded((prev) => !prev)} className="flex w-full items-center justify-between rounded-xl border border-slate-200/80 bg-white/95 px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm">
-            <span className={`inline-flex items-center gap-2 rounded-full px-2 py-1 ${filterFlash ? 'filter-pop bg-brand-100 text-brand-700' : 'bg-slate-100'}`}>{activeFiltersCount} active filters</span>
-            <span className="inline-flex items-center gap-1">{isFilterExpanded ? <PanelTopOpen className="h-4 w-4" /> : <PanelBottomOpen className="h-4 w-4" />}{isFilterExpanded ? 'Hide Filters' : 'Show Filters'}</span>
-          </button>
-        </section>
-      ) : null}
+      <section className="border-b border-slate-200/70 bg-white/90 px-4 py-3">
+        <div className="mb-2 inline-flex rounded-full bg-slate-100 p-1">
+          <button type="button" onClick={() => { setShowMap(true); setShowList(false); }} className={`rounded-full px-3 py-1 text-xs font-semibold ${showMap && !showList ? 'bg-brand-500 text-white' : 'text-slate-700'}`}>Map</button>
+          <button type="button" onClick={() => { setShowMap(false); setShowList(true); }} className={`rounded-full px-3 py-1 text-xs font-semibold ${!showMap && showList ? 'bg-brand-500 text-white' : 'text-slate-700'}`}>List</button>
+          <button type="button" onClick={() => { setShowMap(true); setShowList(true); }} className={`rounded-full px-3 py-1 text-xs font-semibold ${showMap && showList ? 'bg-brand-500 text-white' : 'text-slate-700'}`}>Map + List</button>
+        </div>
+        {!userLoc ? (
+          <div className="flex h-[34vh] flex-col items-center justify-center gap-3 rounded-2xl border border-slate-200/80 bg-slate-50/80 px-4 text-center">
+            {locationLoading ? <div className="h-24 w-full max-w-md animate-pulse rounded-2xl bg-slate-200" /> : <LocateFixed className="h-8 w-8 text-slate-500" />}
+            <p className="text-sm font-semibold text-slate-700">Tap "Use my location" to start.</p>
+            <p className="text-xs text-slate-500">Only highway data and highway-only fuel stations are shown.</p>
+          </div>
+        ) : showMap ? (
+          <section id="map-section"><HighwayMap userLoc={userLoc} highways={highways} places={places} onSelect={setSelectedPlace} rangeKm={rangeKm} /></section>
+        ) : null}
+      </section>
 
-      {!isFilterCompact || isFilterExpanded ? (
+      <section className="border-b border-slate-200/70 bg-slate-50/70 px-4 py-2.5">
+        <button
+          type="button"
+          onClick={() => setIsFilterExpanded((prev) => !prev)}
+          className="flex w-full items-center justify-between rounded-xl border border-slate-200/80 bg-white/95 px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm"
+        >
+          <span className={`inline-flex items-center gap-2 rounded-full px-2 py-1 ${filterFlash ? 'filter-pop bg-brand-100 text-brand-700' : 'bg-slate-100 text-slate-700'}`}>
+            {activeFiltersCount} active filters
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1">
+            {isFilterExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            {isFilterExpanded ? 'Hide Filters' : 'Show Filters'}
+          </span>
+        </button>
+      </section>
+
+      {isFilterExpanded ? (
         <FilterPanel
           viewMode={viewMode}
           setViewMode={setViewMode}
@@ -391,15 +412,12 @@ function HomePageContent() {
         />
       ) : null}
 
-      {activeFiltersCount > 0 ? (
-        <section className="sticky top-[146px] z-20 border-b border-slate-200/70 bg-white/85 px-4 py-2 backdrop-blur-xl">
+      {activeFiltersCount > 0 && !isFilterExpanded ? (
+        <section className="sticky top-[106px] z-20 border-b border-slate-200/60 bg-white/75 px-4 py-2 backdrop-blur-xl">
           <div className="flex flex-wrap items-center gap-2 text-[11px]">
             <span className={`rounded-full px-2 py-0.5 font-semibold text-white ${filterFlash ? 'filter-pop bg-brand-500' : 'bg-slate-900'}`}>{activeFiltersCount} active filters</span>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">Mode: {viewMode}</span>
-            {selectedBrands.length > 0 ? <span className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">Brands: {summarizeSelected(selectedBrands)}</span> : null}
-            {activeFacilities.length > 0 ? <span className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">Facilities: {summarizeSelected(activeFacilities)}</span> : null}
-            {bufferMeters !== 400 ? <span className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">Buffer: {bufferMeters}m</span> : null}
-            {rangeKm !== null ? <span className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">Range: {rangeKm}km</span> : null}
+            {visibleFilterTags.map((tag) => <span key={tag} className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">{tag}</span>)}
+            {hiddenFilterTagCount > 0 ? <span className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">+{hiddenFilterTagCount} more</span> : null}
           </div>
         </section>
       ) : null}
@@ -429,16 +447,6 @@ function HomePageContent() {
           </div>
         </div>
       </section>
-
-      {!userLoc ? (
-        <section className="flex h-[42vh] flex-col items-center justify-center gap-3 border-b border-slate-200/70 bg-slate-50/70 px-4 text-center">
-          {locationLoading ? <div className="h-24 w-full max-w-md animate-pulse rounded-2xl bg-slate-200" /> : <LocateFixed className="h-8 w-8 text-slate-500" />}
-          <p className="text-sm font-semibold text-slate-700">Tap "Use my location" to start.</p>
-          <p className="text-xs text-slate-500">Only highway data and highway-only fuel stations are shown.</p>
-        </section>
-      ) : showMap ? (
-        <section id="map-section"><HighwayMap userLoc={userLoc} highways={highways} places={places} onSelect={setSelectedPlace} rangeKm={rangeKm} /></section>
-      ) : null}
 
       {userLoc && !direction ? (
         <section className="border-b border-slate-200/70 bg-amber-50/70 px-4 py-3">
