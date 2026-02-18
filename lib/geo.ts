@@ -1,4 +1,4 @@
-﻿import { Highway, LatLng, PlaceItem, Station } from '@/types';
+import { Highway, LatLng, PlaceItem, Station } from '@/types';
 
 const EARTH_RADIUS_M = 6371000;
 

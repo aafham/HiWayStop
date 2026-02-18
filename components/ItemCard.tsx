@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { Clock3, Fuel, MapPinned } from 'lucide-react';
 import { PlaceItem } from '@/types';

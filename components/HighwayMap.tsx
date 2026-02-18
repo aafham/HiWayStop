@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useMemo } from 'react';
 import { MapContainer, Marker, Popup, Polyline, TileLayer } from 'react-leaflet';

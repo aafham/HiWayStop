@@ -1,4 +1,4 @@
-﻿import highwaysData from '@/data/highways.json';
+import highwaysData from '@/data/highways.json';
 import rnrData from '@/data/rnr.json';
 import stationsData from '@/data/stations.json';
 import { Highway, Rnr, Station } from '@/types';

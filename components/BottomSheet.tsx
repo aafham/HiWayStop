@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { AlertTriangle, Navigation } from 'lucide-react';
 import { PlaceItem } from '@/types';

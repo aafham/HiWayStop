@@ -1,4 +1,4 @@
-﻿# HiWayStop
+# HiWayStop
 
 Tagline: **Cari R&R & minyak-khusus di lebuh raya.**
 
