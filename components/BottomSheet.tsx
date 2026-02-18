@@ -28,16 +28,16 @@ export default function BottomSheet({ nearest, nextRnR, nextFuel, selected, onSe
   return (
     <section className="max-h-[58vh] overflow-y-auto rounded-t-3xl border-t border-slate-200/80 bg-white/95 p-4 shadow-sheet backdrop-blur">
       {!selected && nearest.length > 0 ? (
-        <div className="mb-3 flex flex-wrap gap-2">
+        <div className="mb-3 flex gap-1 overflow-x-auto rounded-full border border-slate-200 bg-slate-50 p-1">
           <button type="button" onClick={() => onSelect(nearest[0])} className="rounded-full bg-brand-500 px-3 py-1.5 text-xs font-semibold text-white">Open nearest</button>
           <button type="button" onClick={() => {
             const nearestFuel = nearest.find((item) => item.kind === 'FUEL');
             if (nearestFuel) onSelect(nearestFuel);
-          }} className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700">Open nearest fuel</button>
+          }} className="rounded-full px-3 py-1.5 text-xs font-semibold text-slate-700">Open nearest fuel</button>
           <button type="button" onClick={() => {
             const nearestRnr = nearest.find((item) => item.kind === 'RNR');
             if (nearestRnr) onSelect(nearestRnr);
-          }} className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700">Open nearest R&R</button>
+          }} className="rounded-full px-3 py-1.5 text-xs font-semibold text-slate-700">Open nearest R&R</button>
         </div>
       ) : null}
 
@@ -77,7 +77,7 @@ export default function BottomSheet({ nearest, nextRnR, nextFuel, selected, onSe
         {loading ? (
           <div className="space-y-2">{Array.from({ length: 3 }).map((_, idx) => <div key={idx} className="h-24 animate-pulse rounded-2xl border border-slate-200 bg-slate-100" />)}</div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {nearest.map((item) => <ItemCard key={item.id} item={item} onSelect={onSelect} disabled={rangeKm !== null && rangeKm > 0 && (item.distanceKm ?? 0) > rangeKm} />)}
             {nearest.length === 0 ? <p className="text-xs text-slate-500">No matching data to show.</p> : null}
           </div>
@@ -86,7 +86,7 @@ export default function BottomSheet({ nearest, nextRnR, nextFuel, selected, onSe
 
       <div className="mt-4">
         <h2 className="mb-2 text-sm font-bold text-slate-900">Next along direction - R&R</h2>
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {nextRnR.map((item) => <ItemCard key={item.id} item={item} onSelect={onSelect} disabled={rangeKm !== null && rangeKm > 0 && (item.distanceKm ?? 0) > rangeKm} />)}
           {nextRnR.length === 0 ? <p className="text-xs text-slate-500">No upcoming R&R found.</p> : null}
         </div>
@@ -94,7 +94,7 @@ export default function BottomSheet({ nearest, nextRnR, nextFuel, selected, onSe
 
       <div className="mt-4">
         <h2 className="mb-2 text-sm font-bold text-slate-900">Next along direction - Fuel</h2>
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {nextFuel.map((item) => <ItemCard key={item.id} item={item} onSelect={onSelect} disabled={rangeKm !== null && rangeKm > 0 && (item.distanceKm ?? 0) > rangeKm} />)}
           {nextFuel.length === 0 ? <p className="inline-flex items-center gap-1 text-xs text-slate-500"><Navigation className="h-3.5 w-3.5" />No upcoming fuel stations found.</p> : null}
         </div>

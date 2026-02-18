@@ -74,6 +74,7 @@ function HomePageContent() {
   const [showMap, setShowMap] = useState(true);
   const [showList, setShowList] = useState(true);
   const [isFilterExpanded, setIsFilterExpanded] = useState(false);
+  const [isTripExpanded, setIsTripExpanded] = useState(false);
   const [filterFlash, setFilterFlash] = useState(false);
   const [showMapPeek, setShowMapPeek] = useState(false);
 
@@ -308,32 +309,40 @@ function HomePageContent() {
       restAdviceMinutes,
     };
   }, [fuelInRangeCount, priorityNextStop?.distanceKm, totalFuelCount]);
+  const hasTripData = tripStats.nextStopKm !== null || tripStats.nextStopEta !== null;
+
+  useEffect(() => {
+    if (hasTripData) setIsTripExpanded(true);
+  }, [hasTripData]);
 
   return (
     <main className="mx-auto min-h-screen max-w-5xl overflow-hidden bg-white/70 shadow-[0_18px_60px_rgba(15,23,42,0.12)] ring-1 ring-slate-200/80 backdrop-blur">
       <TopBar locationStatus={locationStatus} isHighwayUncertain={isHighwayUncertain} onUseLocation={useCurrentLocation} loading={locationLoading} />
 
-      <section className="border-b border-amber-200/80 bg-amber-50/90 px-4 py-2 text-[11px] font-semibold text-amber-900">
-        <p className="inline-flex items-center gap-1"><ShieldAlert className="h-3.5 w-3.5" />For safety, do not use this app while driving. Use it only when stopped.</p>
+      <section className="border-b border-slate-200/70 bg-slate-50/70 px-4 py-2.5">
+        <div className={`rounded-xl border px-3 py-2 text-xs ${isHighwayUncertain ? 'border-amber-200 bg-amber-50/90 text-amber-900' : 'border-slate-200 bg-white text-slate-700'}`}>
+          <p className="font-semibold">{locationStatus}</p>
+          <p className="mt-1 inline-flex items-center gap-1 font-semibold"><ShieldAlert className="h-3.5 w-3.5" />For safety, do not use this app while driving. Use it only when stopped.</p>
+        </div>
       </section>
 
-      <section className="grid gap-2 border-b border-slate-200/70 bg-slate-50/70 px-4 py-3 sm:grid-cols-2">
+      <section className="border-b border-slate-200/70 bg-slate-50/70 px-4 py-3">
         {locationLoading ? (
-          <>
+          <div className="grid gap-2 sm:grid-cols-2">
             <div className="h-16 animate-pulse rounded-xl border border-slate-200 bg-slate-100" />
             <div className="h-16 animate-pulse rounded-xl border border-slate-200 bg-slate-100" />
-          </>
+          </div>
         ) : (
-          <>
-            <div className="rounded-xl border border-slate-200/80 bg-white/95 p-3.5 shadow-[0_8px_20px_rgba(15,23,42,0.05)]">
-              <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Nearest R&R</p>
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            <div className="min-w-[240px] flex-1 rounded-xl border border-slate-200/80 bg-white/95 p-3 shadow-[0_8px_20px_rgba(15,23,42,0.05)]">
+              <p className="text-[11px] font-semibold text-slate-500">Nearest R&R</p>
               {nearestRnr ? <><p className="mt-1 text-sm font-semibold text-slate-900">{nearestRnr.name}</p><p className="text-xs text-slate-600">{nearestRnr.distanceKm.toFixed(1)} km - ETA {nearestRnr.etaMinutes} min</p></> : <p className="mt-1 text-xs text-slate-500">Enable location to see nearest R&R.</p>}
             </div>
-            <div className="rounded-xl border border-slate-200/80 bg-white/95 p-3.5 shadow-[0_8px_20px_rgba(15,23,42,0.05)]">
-              <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Nearest Fuel Station</p>
+            <div className="min-w-[240px] flex-1 rounded-xl border border-slate-200/80 bg-white/95 p-3 shadow-[0_8px_20px_rgba(15,23,42,0.05)]">
+              <p className="text-[11px] font-semibold text-slate-500">Nearest fuel station</p>
               {nearestFuel ? <><p className="mt-1 text-sm font-semibold text-slate-900">{nearestFuel.name}</p><p className="text-xs text-slate-600">{nearestFuel.distanceKm.toFixed(1)} km - ETA {nearestFuel.etaMinutes} min{nearestFuel.brand ? ` - ${nearestFuel.brand}` : ''}</p></> : <p className="mt-1 text-xs text-slate-500">Enable location to see nearest fuel station.</p>}
             </div>
-          </>
+          </div>
         )}
       </section>
 
@@ -368,6 +377,12 @@ function HomePageContent() {
             {isFilterExpanded ? 'Hide Filters' : 'Show Filters'}
           </span>
         </button>
+        {!isFilterExpanded && activeFiltersCount > 0 ? (
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
+            {visibleFilterTags.map((tag) => <span key={tag} className="rounded-full bg-slate-200 px-2 py-0.5 font-semibold text-slate-700">{tag}</span>)}
+            {hiddenFilterTagCount > 0 ? <span className="rounded-full bg-slate-200 px-2 py-0.5 font-semibold text-slate-700">+{hiddenFilterTagCount} more</span> : null}
+          </div>
+        ) : null}
       </section>
 
       {isFilterExpanded ? (
@@ -395,20 +410,10 @@ function HomePageContent() {
         />
       ) : null}
 
-      {activeFiltersCount > 0 && !isFilterExpanded ? (
-        <section className="sticky top-[106px] z-20 border-b border-slate-200/60 bg-white/75 px-4 py-2 backdrop-blur-xl">
-          <div className="flex flex-wrap items-center gap-2 text-[11px]">
-            <span className={`rounded-full px-2 py-0.5 font-semibold text-white ${filterFlash ? 'filter-pop bg-brand-500' : 'bg-slate-900'}`}>{activeFiltersCount} active filters</span>
-            {visibleFilterTags.map((tag) => <span key={tag} className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">{tag}</span>)}
-            {hiddenFilterTagCount > 0 ? <span className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-700">+{hiddenFilterTagCount} more</span> : null}
-          </div>
-        </section>
-      ) : null}
-
       {priorityNextStop ? (
         <section className="border-b border-slate-200/70 bg-white/80 px-4 py-3">
           <div className="rounded-2xl border border-brand-200/80 bg-gradient-to-br from-brand-50 to-white p-3.5 shadow-[0_10px_28px_rgba(21,149,112,0.12)]">
-            <p className="text-[11px] font-bold uppercase tracking-wide text-brand-700">Next Stop On Route</p>
+            <p className="text-[11px] font-semibold text-brand-700">Next stop on route</p>
             <p className="mt-1 text-sm font-bold text-brand-900">{priorityNextStop.name}</p>
             <p className="text-xs text-brand-900/80">{(priorityNextStop.distanceKm ?? 0).toFixed(1)} km - ETA {priorityNextStop.etaMinutes ?? 0} min</p>
           </div>
@@ -416,28 +421,40 @@ function HomePageContent() {
       ) : null}
 
       <section className="border-b border-slate-200/70 bg-slate-50/70 px-4 py-3">
-        <div className="rounded-2xl border border-slate-200/80 bg-white/95 p-3.5 shadow-[0_10px_24px_rgba(15,23,42,0.05)]">
-          <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Current Trip</p>
-          <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-slate-700">
-            <div className="rounded-lg bg-slate-50 p-2"><p className="font-semibold">Next Stop</p><p>{tripStats.nextStopKm !== null ? `${tripStats.nextStopKm.toFixed(1)} km` : 'Not available'}</p></div>
-            <div className="rounded-lg bg-slate-50 p-2"><p className="font-semibold">Next ETA</p><p>{tripStats.nextStopEta !== null ? `${tripStats.nextStopEta} min` : 'Not available'}</p></div>
-            <div className="rounded-lg bg-slate-50 p-2"><p className="font-semibold">Fuel In Range</p><p>{tripStats.fuelInRange}/{tripStats.totalFuel}</p></div>
-            <div className="rounded-lg bg-slate-50 p-2"><p className="font-semibold">Rest Suggestion</p><p>Every {tripStats.restAdviceMinutes} min</p></div>
-          </div>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <button type="button" onClick={() => { if (priorityNextStop) setSelectedPlace(priorityNextStop); }} className="rounded-full bg-brand-500 px-3 py-1 text-[11px] font-semibold text-white shadow-[0_8px_20px_rgba(21,149,112,0.25)] hover:-translate-y-[1px]">Set next stop</button>
-            <button type="button" onClick={() => { setViewMode('FUEL'); setShowList(true); setShowMap(true); }} className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-700">Find fuel in range</button>
-          </div>
+        <div className="rounded-2xl border border-slate-200/80 bg-white/95 p-3 shadow-[0_10px_24px_rgba(15,23,42,0.05)]">
+          <button type="button" onClick={() => setIsTripExpanded((prev) => !prev)} className="flex w-full items-center justify-between text-left">
+            <p className="text-xs font-semibold text-slate-600">Current trip</p>
+            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+              {hasTripData ? `${tripStats.nextStopKm?.toFixed(1) ?? '-'} km` : 'No next stop'}
+              {isTripExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+            </span>
+          </button>
+          {isTripExpanded ? (
+            <>
+              <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-slate-700">
+                <div className="rounded-lg bg-slate-50 p-2"><p className="font-semibold">Next stop</p><p>{tripStats.nextStopKm !== null ? `${tripStats.nextStopKm.toFixed(1)} km` : 'Not available'}</p></div>
+                <div className="rounded-lg bg-slate-50 p-2"><p className="font-semibold">Next ETA</p><p>{tripStats.nextStopEta !== null ? `${tripStats.nextStopEta} min` : 'Not available'}</p></div>
+                <div className="rounded-lg bg-slate-50 p-2"><p className="font-semibold">Fuel in range</p><p>{tripStats.fuelInRange}/{tripStats.totalFuel}</p></div>
+                <div className="rounded-lg bg-slate-50 p-2"><p className="font-semibold">Rest suggestion</p><p>Every {tripStats.restAdviceMinutes} min</p></div>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <button type="button" onClick={() => { if (priorityNextStop) setSelectedPlace(priorityNextStop); }} className="rounded-full bg-brand-500 px-3 py-1 text-[11px] font-semibold text-white shadow-[0_8px_20px_rgba(21,149,112,0.25)] hover:-translate-y-[1px]">Set next stop</button>
+                <button type="button" onClick={() => { setViewMode('FUEL'); setShowList(true); setShowMap(true); }} className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-700">Find fuel in range</button>
+              </div>
+            </>
+          ) : null}
         </div>
       </section>
 
       {userLoc && !direction ? (
-        <section className="border-b border-slate-200/70 bg-amber-50/70 px-4 py-3">
-          <p className="mb-2 inline-flex items-center gap-1 text-xs font-semibold text-amber-900"><Compass className="h-4 w-4" />Travel direction could not be detected. Please choose manually.</p>
-          <div className="flex flex-wrap gap-2">
+        <section className="border-b border-slate-200/70 bg-amber-50/50 px-4 py-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-amber-200 bg-amber-50/90 px-3 py-2">
+            <p className="inline-flex items-center gap-1 text-xs font-semibold text-amber-900"><Compass className="h-4 w-4" />Direction not detected</p>
+            <div className="inline-flex flex-wrap gap-1">
             {(['NORTH', 'SOUTH', 'EAST', 'WEST'] as const).map((value) => (
-              <button key={value} type="button" onClick={() => setManualDirection(value)} className={`rounded-full px-3 py-1 text-xs font-semibold ${manualDirection === value ? 'bg-brand-500 text-white' : 'bg-white text-slate-700 ring-1 ring-slate-300'}`}>{value}</button>
+                <button key={value} type="button" onClick={() => setManualDirection(value)} className={`rounded-full px-2.5 py-1 text-xs font-semibold ${manualDirection === value ? 'bg-brand-500 text-white' : 'bg-white text-slate-700 ring-1 ring-slate-300'}`}>{value}</button>
             ))}
+            </div>
           </div>
         </section>
       ) : null}

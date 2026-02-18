@@ -21,15 +21,15 @@ export default function ItemCard({ item, onSelect, disabled }: ItemCardProps) {
   const eta = item.etaMinutes ?? 0;
 
   return (
-    <div className={`ui-rise w-full rounded-2xl border p-3.5 text-left transition ${disabled ? 'cursor-not-allowed border-slate-200 bg-slate-100 opacity-60' : 'border-slate-200/80 bg-white/95 hover:border-brand-300 hover:shadow-[0_10px_26px_rgba(15,23,42,0.08)]'}`}>
+    <div className={`ui-rise w-full rounded-2xl border p-3 text-left transition ${disabled ? 'cursor-not-allowed border-slate-200 bg-slate-100/90 opacity-70' : 'border-slate-200/80 bg-white/95 hover:border-brand-300 hover:shadow-[0_10px_22px_rgba(15,23,42,0.08)]'}`}>
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="font-semibold text-slate-900">{item.name}</p>
           <p className="mt-1 text-xs text-slate-600">{item.highwayId} - {item.direction}</p>
         </div>
         <div className="flex flex-col items-end gap-1">
-          <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-700">{item.kind === 'RNR' ? 'R&R' : 'FUEL'}</span>
-          <span className="rounded-full bg-brand-50 px-2 py-1 text-[10px] font-semibold text-brand-700">{onRouteLabel}</span>
+          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700">{item.kind === 'RNR' ? 'R&R' : 'Fuel'}</span>
+          <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-medium text-brand-700">{onRouteLabel}</span>
         </div>
       </div>
 
@@ -40,9 +40,9 @@ export default function ItemCard({ item, onSelect, disabled }: ItemCardProps) {
         {disabled ? <span className="rounded-full bg-rose-100 px-2 py-0.5 font-semibold text-rose-700">Out of range</span> : null}
       </div>
 
-      <div className="mt-3 flex gap-2">
+      <div className="mt-2.5 flex gap-2">
         <button type="button" onClick={() => onSelect(item)} disabled={disabled} className="min-h-[44px] flex-1 rounded-xl bg-brand-500 px-3 py-2 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(21,149,112,0.25)] hover:-translate-y-[1px] hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60">View Details</button>
-        <a href={buildNavigationUrl({ lat: item.lat, lng: item.lng })} target="_blank" rel="noreferrer" aria-disabled={disabled} className={`inline-flex min-h-[44px] items-center gap-1 rounded-xl border px-3 py-2 text-sm font-semibold ${disabled ? 'pointer-events-none border-slate-200 bg-slate-100 text-slate-400' : 'border-slate-300 bg-white text-slate-700 hover:border-brand-300 hover:text-brand-700'}`}><Navigation className="h-3.5 w-3.5" />Navigate</a>
+        {!disabled ? <a href={buildNavigationUrl({ lat: item.lat, lng: item.lng })} target="_blank" rel="noreferrer" className="inline-flex min-h-[44px] items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:border-brand-300 hover:text-brand-700"><Navigation className="h-3.5 w-3.5" />Navigate</a> : null}
       </div>
     </div>
   );
