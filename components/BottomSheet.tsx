@@ -15,15 +15,32 @@ type BottomSheetProps = {
   sortMode: SortMode;
   onSortModeChange: (mode: SortMode) => void;
   loading: boolean;
+  onSetDirection: () => void;
+  onIncreaseBuffer: () => void;
+  onShowNearestOnly: () => void;
 };
 
-export default function BottomSheet({ nearest, nextRnR, nextFuel, selected, onSelect, rangeKm, sortMode, onSortModeChange, loading }: BottomSheetProps) {
+export default function BottomSheet({
+  nearest,
+  nextRnR,
+  nextFuel,
+  selected,
+  onSelect,
+  rangeKm,
+  sortMode,
+  onSortModeChange,
+  loading,
+  onSetDirection,
+  onIncreaseBuffer,
+  onShowNearestOnly,
+}: BottomSheetProps) {
   const selectedEta = selected?.etaMinutes ?? 0;
   const selectedEtaClass = selectedEta < 10 ? 'bg-emerald-100 text-emerald-700' : selectedEta <= 20 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700';
   const noFuelInRange = rangeKm !== null && rangeKm > 0 && nextFuel.length > 0 && nextFuel.every((item) => (item.distanceKm ?? 0) > rangeKm);
 
   const onRouteLabel =
     selected?.onRouteConfidence === 'RNR_LINKED' ? 'R&R-linked' : selected?.onRouteConfidence === 'CORRIDOR_VERIFIED' ? 'On Corridor' : 'R&R Site';
+  const noUpcoming = nextRnR.length === 0 && nextFuel.length === 0;
 
   return (
     <section className="max-h-[58vh] overflow-y-auto rounded-t-3xl border-t border-slate-200/80 bg-white/95 p-4 shadow-sheet backdrop-blur">
@@ -84,21 +101,35 @@ export default function BottomSheet({ nearest, nextRnR, nextFuel, selected, onSe
         )}
       </div>
 
-      <div className="mt-4">
-        <h2 className="mb-2 text-sm font-bold text-slate-900">Next along direction - R&R</h2>
-        <div className="space-y-1.5">
-          {nextRnR.map((item) => <ItemCard key={item.id} item={item} onSelect={onSelect} selected={selected?.id === item.id} disabled={rangeKm !== null && rangeKm > 0 && (item.distanceKm ?? 0) > rangeKm} />)}
-          {nextRnR.length === 0 ? <p className="text-xs text-slate-500">No upcoming R&R found.</p> : null}
+      {noUpcoming ? (
+        <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50/80 p-3">
+          <p className="text-sm font-semibold text-slate-800">No upcoming stops for current direction</p>
+          <p className="mt-1 text-xs text-slate-600">Try setting direction, widening buffer, or focus nearest stops.</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button type="button" onClick={onSetDirection} className="rounded-full bg-brand-500 px-3 py-1 text-xs font-semibold text-white">Set direction</button>
+            <button type="button" onClick={onIncreaseBuffer} className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-300">Increase buffer</button>
+            <button type="button" onClick={onShowNearestOnly} className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-300">Show nearest only</button>
+          </div>
         </div>
-      </div>
+      ) : (
+        <>
+          <div className="mt-4">
+            <h2 className="mb-2 text-sm font-bold text-slate-900">Next along direction - R&R</h2>
+            <div className="space-y-1.5">
+              {nextRnR.map((item) => <ItemCard key={item.id} item={item} onSelect={onSelect} selected={selected?.id === item.id} disabled={rangeKm !== null && rangeKm > 0 && (item.distanceKm ?? 0) > rangeKm} />)}
+              {nextRnR.length === 0 ? <p className="text-xs text-slate-500">No upcoming R&R found.</p> : null}
+            </div>
+          </div>
 
-      <div className="mt-4">
-        <h2 className="mb-2 text-sm font-bold text-slate-900">Next along direction - Fuel</h2>
-        <div className="space-y-1.5">
-          {nextFuel.map((item) => <ItemCard key={item.id} item={item} onSelect={onSelect} selected={selected?.id === item.id} disabled={rangeKm !== null && rangeKm > 0 && (item.distanceKm ?? 0) > rangeKm} />)}
-          {nextFuel.length === 0 ? <p className="inline-flex items-center gap-1 text-xs text-slate-500"><Navigation className="h-3.5 w-3.5" />No upcoming fuel stations found.</p> : null}
-        </div>
-      </div>
+          <div className="mt-4">
+            <h2 className="mb-2 text-sm font-bold text-slate-900">Next along direction - Fuel</h2>
+            <div className="space-y-1.5">
+              {nextFuel.map((item) => <ItemCard key={item.id} item={item} onSelect={onSelect} selected={selected?.id === item.id} disabled={rangeKm !== null && rangeKm > 0 && (item.distanceKm ?? 0) > rangeKm} />)}
+              {nextFuel.length === 0 ? <p className="inline-flex items-center gap-1 text-xs text-slate-500"><Navigation className="h-3.5 w-3.5" />No upcoming fuel stations found.</p> : null}
+            </div>
+          </div>
+        </>
+      )}
     </section>
   );
 }

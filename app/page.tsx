@@ -571,7 +571,24 @@ function HomePageContent() {
 
       {showList ? (
         <section id="list-section">
-          <BottomSheet nearest={nearestTop10} nextRnR={nextByDirection.rnr} nextFuel={nextByDirection.fuel} selected={selectedPlace} onSelect={handleSelectPlace} rangeKm={rangeKm} sortMode={sortMode} onSortModeChange={setSortMode} loading={locationLoading} />
+          <BottomSheet
+            nearest={nearestTop10}
+            nextRnR={nextByDirection.rnr}
+            nextFuel={nextByDirection.fuel}
+            selected={selectedPlace}
+            onSelect={handleSelectPlace}
+            rangeKm={rangeKm}
+            sortMode={sortMode}
+            onSortModeChange={setSortMode}
+            loading={locationLoading}
+            onSetDirection={() => setManualDirection('NORTH')}
+            onIncreaseBuffer={() => setBufferMeters((prev) => Math.min(800, prev + 100))}
+            onShowNearestOnly={() => {
+              setViewMode('ALL');
+              setSortMode('DISTANCE');
+              setShowList(true);
+            }}
+          />
         </section>
       ) : (
         <section className="border-t border-slate-200/70 bg-white/80 px-4 py-6 text-center text-sm text-slate-600">List is hidden. Switch to "List" or "Map + List" to view stop suggestions.</section>
