@@ -1,0 +1,112 @@
+[
+  {
+    "id": "st_sg_buloh_pet",
+    "name": "Petronas Sungai Buloh R&R",
+    "brand": "PETRONAS",
+    "type": "RNR_STATION",
+    "highwayId": "E1",
+    "direction": "NORTHBOUND",
+    "lat": 3.205,
+    "lng": 101.571,
+    "rnrId": "rnr_sg_buloh_nb"
+  },
+  {
+    "id": "st_rawang_shell",
+    "name": "Shell Rawang R&R",
+    "brand": "SHELL",
+    "type": "RNR_STATION",
+    "highwayId": "E1",
+    "direction": "SOUTHBOUND",
+    "lat": 3.328,
+    "lng": 101.559,
+    "rnrId": "rnr_rawang_sb"
+  },
+  {
+    "id": "st_tapah_bhp",
+    "name": "BHP Tapah R&R",
+    "brand": "BHP",
+    "type": "RNR_STATION",
+    "highwayId": "E1",
+    "direction": "NORTHBOUND",
+    "lat": 4.205,
+    "lng": 101.243,
+    "rnrId": "rnr_tapah_nb"
+  },
+  {
+    "id": "st_gurun_pet",
+    "name": "Petronas Gurun R&R",
+    "brand": "PETRONAS",
+    "type": "RNR_STATION",
+    "highwayId": "E1",
+    "direction": "SOUTHBOUND",
+    "lat": 5.819,
+    "lng": 100.492,
+    "rnrId": "rnr_gurun_sb"
+  },
+  {
+    "id": "st_eb_gambang_shell",
+    "name": "Shell Gambang Interchange",
+    "brand": "SHELL",
+    "type": "HIGHWAY_STATION",
+    "highwayId": "E8",
+    "direction": "WESTBOUND",
+    "lat": 3.750,
+    "lng": 103.095,
+    "rnrId": null
+  },
+  {
+    "id": "st_eb_temerloh_pet",
+    "name": "Petronas Temerloh Toll",
+    "brand": "PETRONAS",
+    "type": "HIGHWAY_STATION",
+    "highwayId": "E8",
+    "direction": "EASTBOUND",
+    "lat": 3.946,
+    "lng": 102.339,
+    "rnrId": null
+  },
+  {
+    "id": "st_karak_cal",
+    "name": "Caltex Karak Hub",
+    "brand": "CALTEX",
+    "type": "HIGHWAY_STATION",
+    "highwayId": "E8",
+    "direction": "EASTBOUND",
+    "lat": 3.440,
+    "lng": 102.035,
+    "rnrId": null
+  },
+  {
+    "id": "st_ipoh_city_off",
+    "name": "Shell Ipoh City",
+    "brand": "SHELL",
+    "type": "HIGHWAY_STATION",
+    "highwayId": "E1",
+    "direction": "NORTHBOUND",
+    "lat": 4.596,
+    "lng": 101.090,
+    "rnrId": null
+  },
+  {
+    "id": "st_bentong_town_off",
+    "name": "Petron Bentong Town",
+    "brand": "PETRON",
+    "type": "HIGHWAY_STATION",
+    "highwayId": "E8",
+    "direction": "WESTBOUND",
+    "lat": 3.524,
+    "lng": 101.922,
+    "rnrId": null
+  },
+  {
+    "id": "st_jb_city_off",
+    "name": "BHP Johor Bahru City",
+    "brand": "BHP",
+    "type": "HIGHWAY_STATION",
+    "highwayId": "E1",
+    "direction": "NORTHBOUND",
+    "lat": 1.482,
+    "lng": 103.760,
+    "rnrId": null
+  }
+]

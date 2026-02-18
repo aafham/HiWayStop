@@ -1,0 +1,90 @@
+[
+  {
+    "id": "rnr_sg_buloh_nb",
+    "name": "R&R Sungai Buloh",
+    "highwayId": "E1",
+    "direction": "NORTHBOUND",
+    "lat": 3.205,
+    "lng": 101.572,
+    "facilities": { "surau": true, "toilet": true, "foodcourt": true, "ev": true },
+    "hasFuel": true,
+    "fuelBrands": ["PETRONAS"]
+  },
+  {
+    "id": "rnr_rawang_sb",
+    "name": "R&R Rawang",
+    "highwayId": "E1",
+    "direction": "SOUTHBOUND",
+    "lat": 3.329,
+    "lng": 101.560,
+    "facilities": { "surau": true, "toilet": true, "foodcourt": true, "ev": false },
+    "hasFuel": true,
+    "fuelBrands": ["SHELL"]
+  },
+  {
+    "id": "rnr_tapah_nb",
+    "name": "R&R Tapah",
+    "highwayId": "E1",
+    "direction": "NORTHBOUND",
+    "lat": 4.204,
+    "lng": 101.244,
+    "facilities": { "surau": true, "toilet": true, "foodcourt": true, "ev": false },
+    "hasFuel": true,
+    "fuelBrands": ["PETRONAS", "BHP"]
+  },
+  {
+    "id": "rnr_gurun_sb",
+    "name": "R&R Gurun",
+    "highwayId": "E1",
+    "direction": "SOUTHBOUND",
+    "lat": 5.820,
+    "lng": 100.493,
+    "facilities": { "surau": true, "toilet": true, "foodcourt": true, "ev": true },
+    "hasFuel": true,
+    "fuelBrands": ["PETRONAS"]
+  },
+  {
+    "id": "rnr_gambang_wb",
+    "name": "R&R Gambang",
+    "highwayId": "E8",
+    "direction": "WESTBOUND",
+    "lat": 3.728,
+    "lng": 103.115,
+    "facilities": { "surau": true, "toilet": true, "foodcourt": true, "ev": true },
+    "hasFuel": true,
+    "fuelBrands": ["SHELL"]
+  },
+  {
+    "id": "rnr_temerloh_eb",
+    "name": "R&R Temerloh",
+    "highwayId": "E8",
+    "direction": "EASTBOUND",
+    "lat": 3.947,
+    "lng": 102.337,
+    "facilities": { "surau": true, "toilet": true, "foodcourt": true, "ev": false },
+    "hasFuel": true,
+    "fuelBrands": ["PETRONAS"]
+  },
+  {
+    "id": "rnr_lanchang_wb",
+    "name": "R&R Lanchang",
+    "highwayId": "E8",
+    "direction": "WESTBOUND",
+    "lat": 4.289,
+    "lng": 102.089,
+    "facilities": { "surau": true, "toilet": true, "foodcourt": true, "ev": false },
+    "hasFuel": false,
+    "fuelBrands": []
+  },
+  {
+    "id": "rnr_karak_eb",
+    "name": "R&R Karak",
+    "highwayId": "E8",
+    "direction": "EASTBOUND",
+    "lat": 3.435,
+    "lng": 102.040,
+    "facilities": { "surau": true, "toilet": true, "foodcourt": true, "ev": true },
+    "hasFuel": true,
+    "fuelBrands": ["CALTEX"]
+  }
+]
